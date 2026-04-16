@@ -94,6 +94,9 @@ export default function LoginPage() {
             <Anchor component={Link} href="/auth/signup" size="sm">
               계정이 없으신가요? 회원가입
             </Anchor>
+            <Anchor component={Link} href="/auth/forgot-password" size="sm" color="blue">
+              비밀번호 재설정
+            </Anchor>
           </Group>
 
           <Button type="submit" fullWidth mt="xl" loading={loading} color="violet">
