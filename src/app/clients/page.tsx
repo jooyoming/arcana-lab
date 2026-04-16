@@ -311,7 +311,7 @@ export default function ClientsDashboardPage() {
         ) : (
           <Table.ScrollContainer minWidth={880}>
             <Table verticalSpacing="lg" horizontalSpacing="lg">
-              <Table.Thead borderBottom={`2px solid ${MAIN_INK}`}>
+              <Table.Thead style={{ borderBottom: `2px solid ${MAIN_INK}` }}>
                 <Table.Tr>
                   <Table.Th><Text size="xs" c={MAIN_INK} fw={900} className="font-serif">내담자 성함</Text></Table.Th>
                   <Table.Th><Text size="xs" c={MAIN_INK} fw={900} className="font-serif">유입 방편</Text></Table.Th>

@@ -373,7 +373,7 @@ function SpreadModal({ spread, opened, onClose }: { spread: SpreadType | null; o
               </Badge>
             </Group>
             {isSamhain && (
-              <Text size="xs" c="#8B0000" mt={8} opacity={0.8} italic>
+              <Text size="xs" c="#8B0000" mt={8} opacity={0.8} fs="italic">
                 * 삼하인 절기에는 1번 포지션의 카드가 3장으로 확장되어 더 깊은 통찰을 제공합니다.
               </Text>
             )}

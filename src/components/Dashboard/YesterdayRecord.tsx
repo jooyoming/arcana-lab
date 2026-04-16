@@ -133,7 +133,7 @@ export function YesterdayRecord() {
               </Group>
 
               <Box mt="auto" pt="xs">
-                <Text size="10px" c={MAIN_INK} opacity={0.6} className="font-serif italic">
+                <Text size="10px" c={MAIN_INK} opacity={0.6} className="font-serif" fs="italic">
                   기록된 인연 하나하나가 마스터님의 지혜로 피어났습니다.
                 </Text>
               </Box>

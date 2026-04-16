@@ -194,7 +194,7 @@ export function TodayTopic({ nickname }: TodayTopicProps) {
                   <Text 
                     className="font-serif" 
                     lh={1.5} 
-                    italic 
+                    fs="italic" 
                     c={MAIN_INK} 
                     style={{ fontSize: '0.9rem', wordBreak: 'keep-all' }}
                   >

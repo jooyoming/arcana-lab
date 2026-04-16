@@ -204,7 +204,7 @@ export function RevenueCalendarModal({ opened, onClose }: RevenueCalendarModalPr
                       </Stack>
                     )}
                     {!stats && isCurrentMonth && (
-                       <Box mt="auto" alignSelf="flex-end" pr={4} pb={2}>
+                       <Box mt="auto" style={{ alignSelf: 'flex-end' }} pr={4} pb={2}>
                          <Box style={{ width: 2, height: 2, borderRadius: '50%', backgroundColor: `${MAIN_INK}22` }} />
                        </Box>
                     )}
@@ -246,7 +246,7 @@ export function RevenueCalendarModal({ opened, onClose }: RevenueCalendarModalPr
           </Stack>
         )}
 
-        <Text size="10px" mt="xl" ta="center" c="dimmed" italic className="font-serif">
+        <Text size="10px" mt="xl" ta="center" c="dimmed" fs="italic" className="font-serif">
           귀한 인연들이 남기고 간 흔적을 비망록에 새깁니다.
         </Text>
       </Box>

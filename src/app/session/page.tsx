@@ -383,7 +383,6 @@ export default function TarotInputFormPage() {
         opened={uploadModalOpened}
         onClose={() => setUploadModalOpened(false)}
         title={uploadTarget === 'tarot' ? "아르카나 기록의 서" : "오라클 비방의 서"}
-        position="bottom"
         radius="xl"
         padding="xl"
         className="bori-action-sheet"
