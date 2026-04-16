@@ -14,7 +14,7 @@ import {
   Alert,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconAlertCircle, IconMail, IconArrowLeft } from '@tabler/icons-react';
+import { IconAlertCircle, IconMail, IconArrowLeft, IconCircleLetterA } from '@tabler/icons-react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 
@@ -53,12 +53,12 @@ export default function ForgotPasswordPage() {
   return (
     <Container size={420} my={80}>
       <Stack align="center" mb={30}>
-        <IconMail size={40} color="var(--mantine-color-violet-filled)" />
-        <Title order={2} ta="center" fw={900}>
+        <IconCircleLetterA size={50} color="var(--bori-gold)" stroke={1.5} />
+        <Title order={2} ta="center" style={{ fontFamily: 'var(--font-serif)', color: 'var(--bori-deep)' }}>
           비밀번호 찾기
         </Title>
         <Text c="dimmed" size="sm" ta="center">
-          가입하신 이메일을 입력하시면 비밀번호 재설정 링크를 보내드립니다.
+          가입하신 이메일을 입력하시면 아르카나 랩의 재설정 링크를 보내드립니다.
         </Text>
       </Stack>
 
@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
             <Alert color="teal" title="이메일 발송 완료">
               비밀번호 재설정 링크가 이메일로 발송되었습니다. 이메일 안의 링크를 확인해 주세요.
             </Alert>
-            <Button component={Link} href="/auth/login" variant="light" color="violet" fullWidth mt="md">
+            <Button component={Link} href="/auth/login" variant="light" color="bori-deep" fullWidth mt="md">
               로그인 페이지로 돌아가기
             </Button>
           </Stack>
@@ -89,7 +89,7 @@ export default function ForgotPasswordPage() {
               />
             </Stack>
 
-            <Button type="submit" fullWidth mt="xl" loading={loading} color="violet">
+            <Button type="submit" fullWidth mt="xl" loading={loading} className="btn-seal" size="md">
               비밀번호 재설정 링크 받기
             </Button>
 

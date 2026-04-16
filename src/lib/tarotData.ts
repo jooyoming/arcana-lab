@@ -221,6 +221,59 @@ export const SPREAD_TYPES: SpreadType[] = [
       { label: '최종 결과', x: 80, y: 20 }
     ]
   },
+  {
+    value: '4-card-elements', label: '4-카드 요소 배열법 (4장)', count: 4,
+    category: ['기타', '인간관계'],
+    usage: '상황을 구성하는 4대 요소(공기, 불, 물, 흙)의 균형을 점검할 때',
+    description: '지(Earth), 수(Water), 화(Fire), 풍(Air)의 에너지가 현재 어떻게 작용하고 있는지 분석하여 균형 잡힌 해결책을 제시합니다.',
+    layout: [
+      { label: '공기 (생각)', x: 50, y: 20 },
+      { label: '불 (행동)', x: 80, y: 50 },
+      { label: '물 (감정)', x: 50, y: 80 },
+      { label: '흙 (현실)', x: 20, y: 50 }
+    ]
+  },
+  {
+    value: '4-card-progress', label: '4-카드 전개 배열법 (4장)', count: 4,
+    category: ['연애', '취업', '금전'],
+    usage: '사건의 흐름과 최종 조언을 함께 보고 싶을 때',
+    description: '과거, 현재, 미래의 흐름 끝에 구체적인 조언(Advice)을 덧붙여 실질적인 행동 지침을 제공합니다.',
+    layout: [
+      { label: '과거', x: 20, y: 50 },
+      { label: '현재', x: 40, y: 50 },
+      { label: '미래', x: 60, y: 50 },
+      { label: '조언', x: 80, y: 50 }
+    ]
+  },
+  {
+    value: 'four-powers', label: 'The Four Powers (4장)', count: 4,
+    category: ['기타', '학업'],
+    usage: '내면의 힘과 잠재력을 기하학적 대칭 구조로 분석할 때',
+    description: '육각형과 상하 대칭의 신비로운 배치를 통해 질문자가 가진 네 가지 핵심 에너지를 시각화합니다.',
+    layout: [
+      { label: '잠재력 (상)', x: 50, y: 20 },
+      { label: '현실력 (하)', x: 50, y: 80 },
+      { label: '의지력 (좌)', x: 20, y: 50 },
+      { label: '실천력 (우)', x: 80, y: 50 }
+    ]
+  },
+  {
+    value: 'inner-wheel', label: 'The Inner Wheel (9장)', count: 9, scale: 0.7,
+    category: ['기타'],
+    usage: '1년의 흐름(8절기)과 중심 테마를 원형으로 분석할 때',
+    description: '중앙의 지표 카드를 중심으로 8개의 절기를 수레바퀴 모양으로 배치하여 운명의 순환과 리듬을 읽어냅니다.',
+    layout: [
+      { label: '중심 지표 (Center)', x: 50, y: 50 },
+      { label: '삼하인 (Samhain)', x: 50, y: 15 },
+      { label: '율 (Yule)', x: 75, y: 25 },
+      { label: '임볼크 (Imbolc)', x: 85, y: 50 },
+      { label: '오스타라 (Ostara)', x: 75, y: 75 },
+      { label: '벨테인 (Beltane)', x: 50, y: 85 },
+      { label: '리타 (Litha)', x: 25, y: 75 },
+      { label: '루나사 (Lughnasadh)', x: 15, y: 50 },
+      { label: '마본 (Mabon)', x: 25, y: 25 }
+    ]
+  },
 ];
 
 export function getCardImageUrl(cardName: string): string {

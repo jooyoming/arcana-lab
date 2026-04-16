@@ -73,15 +73,15 @@ export default function DailyTipPage() {
   }, []);
 
   return (
-    <Box style={{ minHeight: '100vh', background: 'linear-gradient(180deg, #fafbff 0%, #f3f0ff 100%)' }}>
+    <Box style={{ minHeight: '100vh', backgroundColor: '#F9F7F2', backgroundImage: "url('https://www.transparenttextures.com/patterns/paper-fibers.png')" }}>
       <Container size="sm" py="xl">
         {/* 헤더 */}
         <Box ta="center" mb={36}>
           <Group justify="center" gap="xs" mb={10}>
-            <IconBulb size={26} color="#7c3aed" />
-            <Text style={{ fontSize: 24, fontWeight: 800, color: '#1a1a2e' }}>오늘의 상담 TIP</Text>
+            <IconBulb size={26} color="#C5A059" />
+            <Text style={{ fontSize: 24, fontWeight: 800, color: '#1A2F2F', fontFamily: 'var(--font-serif)' }}>오늘의 상담 TIP</Text>
           </Group>
-          <Text c="rgba(124,58,237,0.7)" size="sm">
+          <Text c="#C5A059" size="sm" style={{ fontWeight: 600, letterSpacing: '1px' }}>
             초보 리더를 위한 실전 카드뉴스 · 매일 업데이트
           </Text>
         </Box>
@@ -89,7 +89,7 @@ export default function DailyTipPage() {
         {/* 로딩 */}
         {loading && (
           <Box ta="center" py={80}>
-            <Loader color="violet" size="md" />
+            <Loader color="#C5A059" size="md" />
             <Text c="dimmed" size="sm" mt={16}>오늘의 팁을 불러오는 중...</Text>
           </Box>
         )}
@@ -116,12 +116,12 @@ export default function DailyTipPage() {
           <Box
             ta="center" py={60}
             style={{
-              border: '1px dashed rgba(124,58,237,0.25)',
-              borderRadius: 20, background: 'rgba(124,58,237,0.03)',
+              border: '1px dashed rgba(197, 160, 89, 0.4)',
+              borderRadius: 20, background: 'rgba(197, 160, 89, 0.03)',
             }}
           >
             <Text style={{ fontSize: 40, marginBottom: 16 }}>🔮</Text>
-            <Text fw={700} c="#1a1a2e" mb={8}>오늘의 팁이 아직 없어요</Text>
+            <Text fw={700} c="#1A2F2F" mb={8} className="font-serif">오늘의 팁이 아직 없어요</Text>
             <Text c="dimmed" size="sm" mb={28} maw={300} mx="auto" lh={1.7}>
               AI가 오늘의 실전 상담 팁을 제작합니다.<br />보통 10~20초 정도 걸려요.
             </Text>
@@ -129,7 +129,7 @@ export default function DailyTipPage() {
               onClick={generateTip}
               loading={generating}
               leftSection={<IconRefresh size={16} />}
-              style={{ background: 'linear-gradient(135deg, #7c3aed, #9333ea)' }}
+              style={{ background: '#1A2F2F' }}
               radius="xl"
             >
               오늘의 팁 생성하기

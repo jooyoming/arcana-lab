@@ -15,7 +15,7 @@ import {
   Alert,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconAlertCircle, IconSparkles } from '@tabler/icons-react';
+import { IconAlertCircle, IconCircleLetterA } from '@tabler/icons-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -69,14 +69,14 @@ export default function SignUpPage() {
   if (success) {
     return (
       <Container size={420} my={80}>
-        <Paper withBorder shadow="md" p={30} radius="md" ta="center">
-          <IconSparkles size={40} color="var(--mantine-color-teal-filled)" style={{ marginBottom: 20 }} />
-          <Title order={2} mb="md">회원가입 완료!</Title>
-          <Text mb="xl">
-            가입한 이메일로 인증 메일이 발송되었습니다.<br />
-            이메일 확인 후 로그인을 진행해주세요.
+        <Paper className="bori-card" p={40} ta="center" style={{ textAlign: 'center' }}>
+          <IconCircleLetterA size={50} color="var(--bori-gold)" style={{ marginBottom: 20 }} />
+          <Title order={2} mb="md" style={{ fontFamily: 'var(--font-serif)', color: 'var(--bori-deep)' }}>인연의 시작</Title>
+          <Text mb="xl" size="sm" c="dimmed">
+            가입하신 이메일로 인증 메일이 발송되었습니다.<br />
+            이메일 확인을 마치시면 아르카나 랩의 모든 기능을 사용하실 수 있습니다.
           </Text>
-          <Button component={Link} href="/auth/login" fullWidth color="violet">
+          <Button component={Link} href="/auth/login" fullWidth className="btn-seal" size="md">
             로그인 페이지로 이동
           </Button>
         </Paper>
@@ -87,12 +87,21 @@ export default function SignUpPage() {
   return (
     <Container size={420} my={80}>
       <Stack align="center" mb={30}>
-        <IconSparkles size={40} color="var(--mantine-color-violet-filled)" />
-        <Title order={2} ta="center" fw={900}>
-          새로운 시작
+        <IconCircleLetterA size={50} color="var(--bori-gold)" stroke={1.5} />
+        <Title 
+          order={1} 
+          ta="center" 
+          style={{ 
+            fontFamily: 'var(--font-serif)', 
+            fontSize: '2.2rem',
+            color: 'var(--bori-deep)',
+            letterSpacing: '1px'
+          }}
+        >
+          아르카나 랩
         </Title>
-        <Text c="dimmed" size="sm" ta="center">
-          Magician Deck과 함께 스마트하게 상담을 관리하세요
+        <Text c="dimmed" size="sm" ta="center" style={{ letterSpacing: '0.5px' }}>
+          새로운 리더님의 영입을 환영합니다, Arcana Lab
         </Text>
       </Stack>
 
@@ -137,8 +146,15 @@ export default function SignUpPage() {
             </Anchor>
           </Group>
 
-          <Button type="submit" fullWidth mt="xl" loading={loading} color="violet" radius="md">
-            회원가입
+          <Button 
+            type="submit" 
+            fullWidth 
+            mt="xl" 
+            loading={loading} 
+            className="btn-seal"
+            size="md"
+          >
+            시작하기 (Join Us)
           </Button>
         </form>
       </Paper>

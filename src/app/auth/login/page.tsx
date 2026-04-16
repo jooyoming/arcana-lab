@@ -15,7 +15,7 @@ import {
   Alert,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconAlertCircle, IconMoonStars } from '@tabler/icons-react';
+import { IconAlertCircle, IconCircleLetterA } from '@tabler/icons-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -58,12 +58,21 @@ export default function LoginPage() {
   return (
     <Container size={420} my={80}>
       <Stack align="center" mb={30}>
-        <IconMoonStars size={40} color="var(--mantine-color-violet-filled)" />
-        <Title order={2} ta="center" fw={900}>
-          Magician Deck
+        <IconCircleLetterA size={50} color="var(--bori-gold)" stroke={1.5} />
+        <Title 
+          order={1} 
+          ta="center" 
+          style={{ 
+            fontFamily: 'var(--font-serif)', 
+            fontSize: '2.2rem',
+            color: 'var(--bori-deep)',
+            letterSpacing: '1px'
+          }}
+        >
+          아르카나 랩
         </Title>
-        <Text c="dimmed" size="sm" ta="center">
-          타로 리더님, 다시 오신 것을 환영합니다
+        <Text c="dimmed" size="sm" ta="center" style={{ letterSpacing: '0.5px' }}>
+          현대적 감각의 타로 리빙 솔루션, Arcana Lab
         </Text>
       </Stack>
 
@@ -99,8 +108,15 @@ export default function LoginPage() {
             </Anchor>
           </Group>
 
-          <Button type="submit" fullWidth mt="xl" loading={loading} color="violet">
-            로그인
+          <Button 
+            type="submit" 
+            fullWidth 
+            mt="xl" 
+            loading={loading} 
+            className="btn-seal"
+            size="md"
+          >
+            로그인 (Login)
           </Button>
         </form>
       </Paper>

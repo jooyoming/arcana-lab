@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { TextInput, Textarea, Button, Container, Select, Paper, Stack, Group, Text, Switch, FileInput, Card, Divider, NumberInput, ActionIcon, Flex } from '@mantine/core';
+import { useState, useRef } from 'react';
+import { TextInput, Textarea, Button, Container, Select, Paper, Stack, Group, Text, Switch, Card, Divider, NumberInput, ActionIcon, Modal, Box, Image, Center, AspectRatio } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconUpload, IconWand, IconDeviceFloppy, IconSearch, IconTrash, IconPlus } from '@tabler/icons-react';
+import { IconUpload, IconWand, IconDeviceFloppy, IconTrash, IconPlus, IconCamera, IconX } from '@tabler/icons-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { MAJOR_ARCANA, MINOR_ARCANA, SPREAD_TYPES, getCardImageUrl } from '@/lib/tarotData';
+import { CameraModal } from '@/components/Session/CameraModal';
 
 const TAROT_CARDS_DATA = [
   { group: '메이저 아르카나 (Major)', items: MAJOR_ARCANA },
@@ -21,15 +22,30 @@ const BONUS_CARD_DATA = [
   ...TAROT_CARDS_DATA
 ];
 
+// 전통 문양 아이콘 컴포넌트
+const MirrorIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
+    <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1" strokeDasharray="2 2" />
+    <path d="M12 3V5M12 19V21M3 12H5M19 12H21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <path d="M5.636 5.636L7.05 7.05M16.95 16.95L18.364 18.364M5.636 18.364L7.05 16.95M16.95 7.05L18.364 5.636" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const ScrollIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7 4V18M7 4C7 2.89543 7.89543 2 9 2H19C20.1046 2 21 2.89543 21 4V16C21 17.1046 20.1046 18 19 18H9C7.89543 18 7 18.8954 7 20C7 21.1046 6.10457 22 5 22H3C1.89543 22 1 21.1046 1 20V6C1 4.89543 1.89543 4 3 4H7Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+    <path d="M11 6H17M11 10H17M11 14H15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
 interface RecognizedCard {
   index: number;
   name: string;
   orientation: string;
-  /** 배열법 포지션 명칭 (예: '현재 상황') */
   positionLabel?: string;
 }
 
-// AI가 반환하는 다양한 정/역방향 표현을 드롭다운 값으로 정규화
 const normalizeOrientation = (orientation: string): string => {
   if (!orientation) return '정방향';
   const o = orientation.trim().toLowerCase();
@@ -39,7 +55,6 @@ const normalizeOrientation = (orientation: string): string => {
   return '정방향';
 };
 
-// 카드명이 기존 목록에 없으면 AI 인식 결과 그룹을 최상단에 추가
 const ALL_CARD_NAMES = new Set([...MAJOR_ARCANA, ...MINOR_ARCANA]);
 const getCardSelectData = (cardName: string) => {
   if (ALL_CARD_NAMES.has(cardName)) return TAROT_CARDS_DATA;
@@ -50,16 +65,16 @@ const getCardSelectData = (cardName: string) => {
 };
 
 export default function TarotInputFormPage() {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSaving, setIsGeneratingSave] = useState(false);
   
   const [recognizedCards, setRecognizedCards] = useState<RecognizedCard[]>([]);
   const [readingResult, setReadingResult] = useState('');
   
   const supabase = createClient();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
 
   const form = useForm({
     initialValues: {
@@ -71,18 +86,68 @@ export default function TarotInputFormPage() {
       oracleImage: null as File | null,
       oracleDeckName: '',
       toneAndManner: '따뜻하고 공감적인 위로',
-      
-      // 배열법 선택
       spreadType: '3-card',
-
-      // CRM 정보
       clientName: '',
       platform: '카카오톡',
       paymentAmount: 0,
     }
   });
 
-  // [1단계] 사진 분석 요청
+  const [uploadModalOpened, setUploadModalOpened] = useState(false);
+  const [uploadTarget, setUploadTarget] = useState<'tarot' | 'oracle'>('tarot');
+  const [tarotPreview, setTarotPreview] = useState<string | null>(null);
+  const [oraclePreview, setOraclePreview] = useState<string | null>(null);
+  
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const albumInputRef = useRef<HTMLInputElement>(null);
+  const [cameraModalOpened, setCameraModalOpened] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (uploadTarget === 'tarot') {
+      form.setFieldValue('tarotImage', file);
+      if (tarotPreview) URL.revokeObjectURL(tarotPreview);
+      setTarotPreview(URL.createObjectURL(file));
+    } else {
+      form.setFieldValue('oracleImage', file);
+      if (oraclePreview) URL.revokeObjectURL(oraclePreview);
+      setOraclePreview(URL.createObjectURL(file));
+    }
+    setUploadModalOpened(false);
+    e.target.value = '';
+  };
+
+  const handleCapture = (file: File) => {
+    if (uploadTarget === 'tarot') {
+      form.setFieldValue('tarotImage', file);
+      if (tarotPreview) URL.revokeObjectURL(tarotPreview);
+      setTarotPreview(URL.createObjectURL(file));
+    } else {
+      form.setFieldValue('oracleImage', file);
+      if (oraclePreview) URL.revokeObjectURL(oraclePreview);
+      setOraclePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const removeImage = (target: 'tarot' | 'oracle') => {
+    if (target === 'tarot') {
+      form.setFieldValue('tarotImage', null);
+      if (tarotPreview) URL.revokeObjectURL(tarotPreview);
+      setTarotPreview(null);
+    } else {
+      form.setFieldValue('oracleImage', null);
+      if (oraclePreview) URL.revokeObjectURL(oraclePreview);
+      setOraclePreview(null);
+    }
+  };
+
+  const openUploadModal = (target: 'tarot' | 'oracle') => {
+    setUploadTarget(target);
+    setUploadModalOpened(true);
+  };
+
   const analyzeCards = async () => {
     if (!form.values.tarotImage) {
       alert("타로 카드 이미지를 업로드해주세요.");
@@ -106,16 +171,11 @@ export default function TarotInputFormPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error);
 
-      // 디버그: API 원본 응답 확인
-      console.log('[카드 인식 원본 응답]', JSON.stringify(data.result, null, 2));
-
-      // 정/역방향 정규화 후 상태 업데이트
       const normalizedCards = (data.result || []).map((card: RecognizedCard) => ({
         ...card,
         orientation: normalizeOrientation(card.orientation),
       }));
 
-      console.log('[정규화된 카드 데이터]', normalizedCards);
       setRecognizedCards(normalizedCards);
       setStep(2);
     } catch (err: any) {
@@ -149,10 +209,9 @@ export default function TarotInputFormPage() {
     setRecognizedCards([...recognizedCards, { index: recognizedCards.length + 1, name: '0 - 바보 (The Fool)', orientation: '정방향' }]);
   };
 
-  // [2단계] 확정된 카드로 최종 리딩 요청
   const generateFinalReading = async () => {
     if (recognizedCards.length === 0) {
-      alert("분석된 카드가 한 장도 없습니다. 카드를 추가하거나 다시 사진을 분석해주세요.");
+      alert("분석된 카드가 한 장도 없습니다.");
       return;
     }
 
@@ -172,9 +231,7 @@ export default function TarotInputFormPage() {
 
       const response = await fetch('/api/generate-reading', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
@@ -194,15 +251,15 @@ export default function TarotInputFormPage() {
     const { clientName, platform, paymentAmount, category, situation, bonusCards, useOracle, oracleDeckName, toneAndManner } = form.values;
 
     if (!clientName.trim()) {
-      alert('내담자 이름(닉네임)을 입력해주세요.');
+      alert('내담자 이름을 입력해주세요.');
       return;
     }
     if (!readingResult.trim()) {
-      alert('먼저 AI 리딩을 완료한 후 저장할 수 있습니다.');
+      alert('먼저 AI 리딩을 완료해주세요.');
       return;
     }
 
-    setIsSaving(true);
+    setIsGeneratingSave(true);
     try {
       let clientId = null;
       let isExistingClient = false;
@@ -229,9 +286,6 @@ export default function TarotInputFormPage() {
         if (newClient) clientId = newClient.id;
       }
 
-      if (!clientId) throw new Error('내담자 ID를 식별하지 못했습니다.');
-
-      // 카드 이미지 정보 구성
       const cardImages = [
         ...recognizedCards.map(c => ({
           name: c.name,
@@ -260,104 +314,243 @@ export default function TarotInputFormPage() {
           tone_and_manner: toneAndManner,
           ai_reading_result: readingResult,
           payment_amount: paymentAmount,
-          tarot_image_url: null, 
-          oracle_image_url: null
         });
 
       if (sessionError) throw sessionError;
 
-      alert(`성공적으로 저장되었습니다! (${isExistingClient ? '기존 방문 내담자' : '신규 내담자'} 인식됨)`);
-      
-      // 상태 초기화
+      alert(`저장 완료! (${isExistingClient ? '기존' : '신규'} 내담자)`);
       form.reset();
       setRecognizedCards([]);
       setReadingResult('');
+      setTarotPreview(null);
+      setOraclePreview(null);
       setStep(1);
       
     } catch (error: any) {
-      console.error(error);
-      alert(`저장 중 오류 발생: ${error.message}`);
+      alert(`저장 오류: ${error.message}`);
     } finally {
-      setIsSaving(false);
+      setIsGeneratingSave(false);
     }
   };
 
   return (
     <Container size="md" py="xl">
-      <Card shadow="sm" padding="xl" radius="xl" withBorder>
+      <style jsx global>{`
+        .ink-bleed-btn {
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s ease;
+        }
+        .ink-bleed-btn:active::after {
+          content: "";
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 5px;
+          height: 5px;
+          background: rgba(26, 47, 47, 0.15);
+          opacity: 0;
+          border-radius: 100%;
+          transform: scale(1) translate(-50%, -50%);
+          transform-origin: 50% 50%;
+          animation: ink-ripple 0.6s ease-out;
+        }
+        @keyframes ink-ripple {
+          0% { transform: scale(0) translate(-50%, -50%); opacity: 1; }
+          100% { transform: scale(40) translate(-50%, -50%); opacity: 0; }
+        }
+        .bori-action-sheet .mantine-Modal-content {
+          background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+          background-color: #F9F7F2 !important;
+          box-shadow: 0 -10px 40px rgba(26, 47, 47, 0.1) !important;
+        }
+      `}</style>
+
+      {/* 이미지 업로드용 숨겨진 Input */}
+      <input 
+        type="file" accept="image/*" capture="environment" 
+        style={{ display: 'none' }} ref={cameraInputRef} 
+        onChange={handleFileChange}
+      />
+      <input 
+        type="file" accept="image/*" 
+        style={{ display: 'none' }} ref={albumInputRef} 
+        onChange={handleFileChange}
+      />
+
+      {/* 동양풍 업로드 옵션 모달 */}
+      <Modal
+        opened={uploadModalOpened}
+        onClose={() => setUploadModalOpened(false)}
+        title={uploadTarget === 'tarot' ? "아르카나 기록의 서" : "오라클 비방의 서"}
+        position="bottom"
+        radius="xl"
+        padding="xl"
+        className="bori-action-sheet"
+        styles={{
+          content: { borderTop: '3px solid #C5A059' },
+          header: { background: 'transparent' },
+          title: { fontWeight: 900, color: '#1A2F2F', fontFamily: 'var(--font-serif)', fontSize: '1.2rem' }
+        }}
+      >
+        <Stack gap="lg">
+          <Paper 
+            withBorder p="md" radius="md" className="ink-bleed-btn"
+            onClick={() => {
+              setUploadModalOpened(false);
+              setCameraModalOpened(true);
+            }}
+            style={{ 
+              cursor: 'pointer', borderColor: '#C5A059', backgroundColor: 'rgba(197, 160, 89, 0.05)',
+              display: 'flex', alignItems: 'center', gap: '16px'
+            }}
+          >
+            <Center style={{ width: 48, height: 48, borderRadius: '12px', background: '#1A2F2F', color: '#F9F7F2' }}>
+              <MirrorIcon />
+            </Center>
+            <Box style={{ flex: 1 }}>
+              <Text fw={800} size="md" c="#1A2F2F">[현장의 찰나 기록]</Text>
+              <Text size="xs" c="#1A2F2F" opacity={0.7}>실시간 사진 촬영 기능</Text>
+            </Box>
+          </Paper>
+
+          <Paper 
+            withBorder p="md" radius="md" className="ink-bleed-btn"
+            onClick={() => albumInputRef.current?.click()}
+            style={{ 
+              cursor: 'pointer', borderColor: '#C5A059', backgroundColor: 'rgba(197, 160, 89, 0.05)',
+              display: 'flex', alignItems: 'center', gap: '16px'
+            }}
+          >
+            <Center style={{ width: 48, height: 48, borderRadius: '12px', background: '#1A2F2F', color: '#F9F7F2' }}>
+              <ScrollIcon />
+            </Center>
+            <Box style={{ flex: 1 }}>
+              <Text fw={800} size="md" c="#1A2F2F">[비방의 기록 불러오기]</Text>
+              <Text size="xs" c="#1A2F2F" opacity={0.7}>기존 앨범(갤러리)에서 사진 선택</Text>
+            </Box>
+          </Paper>
+          
+          <Button variant="subtle" color="gray" onClick={() => setUploadModalOpened(false)} radius="md">
+            기록 중단 (Close)
+          </Button>
+        </Stack>
+      </Modal>
+
+      <Card shadow="sm" padding="xl" radius="md" withBorder className="bori-card">
         <Stack align="center" mb="xl">
-          <Text size="2xl" fw={800} variant="gradient" gradient={{ from: 'indigo', to: 'cyan', deg: 45 }} style={{ letterSpacing: '-0.5px' }}>
-            새로운 타로 리딩 (2단계 분석)
+          <Text size="2xl" fw={900} className="font-serif" style={{ color: 'var(--bori-deep)', letterSpacing: '-0.5px' }}>
+            새로운 타로 리딩 (AI 분석)
           </Text>
-          <Text size="sm" c="dimmed">사진을 분석하여 카드를 정확하게 확인하고 정교한 리딩을 받아보세요.</Text>
+          <Text size="sm" c="dimmed">사진 속에 담긴 운명의 기운을 AI로 해독합니다.</Text>
         </Stack>
 
         <Stack gap="lg">
           <Select
             label="1. 상담 카테고리"
             data={['연애운', '취업운', '금전운', '학업운', '인간관계', '기타']}
+            className="bori-input"
             {...form.getInputProps('category')}
             radius="md" size="md"
           />
 
           <Select
-            label="2. 배열법 선택 (촬영한 스프레드)"
+            label="2. 배열법 선택"
             data={SPREAD_TYPES.map((s) => ({ value: s.value, label: `${s.label}` }))}
+            className="bori-input"
             {...form.getInputProps('spreadType')}
             radius="md" size="md"
-            description="사진에 깔린 카드 배열법과 동일하게 선택해야 순서가 정확히 매핑됩니다."
           />
 
           <Textarea
             label="3. 내담자 상황"
-            placeholder="현재 내담자의 고민과 상황을 상세히 적어주세요..."
+            placeholder="하늘의 뜻을 묻기 전, 현재의 상황을 정갈히 적어주세요..."
+            className="bori-input"
             minRows={4} autosize
             {...form.getInputProps('situation')}
             radius="md" size="md"
           />
 
-          <Paper p="md" radius="md" withBorder>
+          <Paper p="md" radius="md" withBorder style={{ backgroundColor: 'rgba(197, 160, 89, 0.05)', borderColor: '#C5A059' }}>
             <Stack gap="xs">
-              <Text fw={600} size="sm">4. 타로 / 오라클 카드 사진 업로드</Text>
+              <Text fw={800} size="sm" c="#1A2F2F">4. 운명의 기록 (사진 업로드)</Text>
               
-              <Paper p="sm" bg="gray.0" radius="md" mb="xs">
-                <Text size="xs" c="dimmed">
-                  💡 켈틱 크로스처럼 카드가 겹치는 배열은, 아래 카드의 모서리나 기호가 살짝 보이도록 엇갈리게 놓아주시면 AI가 더 정확하게 인식합니다.
-                </Text>
-              </Paper>
+              <Box mb="sm">
+                <Text size="xs" mb={4} fw={600} opacity={0.7} c="#1A2F2F">• 타로 스프레드 (필수)</Text>
+                {!tarotPreview ? (
+                  <Paper 
+                    withBorder p="xl" radius="md" 
+                    onClick={() => openUploadModal('tarot')}
+                    style={{ 
+                      cursor: 'pointer', borderStyle: 'dashed', backgroundColor: '#fff', borderColor: '#C5A059',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px'
+                    }}
+                  >
+                    <IconCamera size={36} color="#C5A059" stroke={1} />
+                    <Text size="sm" fw={700} c="#C5A059">사진을 봉인 해제하여 업로드</Text>
+                  </Paper>
+                ) : (
+                  <Box style={{ position: 'relative' }}>
+                    <AspectRatio ratio={16/9}>
+                      <Image src={tarotPreview} radius="md" alt="tarot preview" />
+                    </AspectRatio>
+                    <ActionIcon 
+                      variant="filled" color="red" radius="xl"
+                      style={{ position: 'absolute', top: -10, right: -10, zIndex: 10, boxShadow: '0 4px 10px rgba(0,0,0,0.2)' }}
+                      onClick={() => removeImage('tarot')}
+                    >
+                      <IconX size={16} />
+                    </ActionIcon>
+                  </Box>
+                )}
+              </Box>
 
-              <FileInput
-                placeholder="터치하여 이미지 업로드"
-                accept="image/*"
-                leftSection={<IconUpload size={18} />}
-                {...form.getInputProps('tarotImage')}
-                radius="md" size="md"
-              />
-
-              <Group justify="space-between" mt="md">
-                <Text size="sm" fw={600}>오라클 카드 사용 여부</Text>
+              <Group justify="space-between" mt="xs">
+                <Text size="sm" fw={800} c="#1A2F2F">오라클의 비방 추가</Text>
                 <Switch 
                   {...form.getInputProps('useOracle', { type: 'checkbox' })}
-                  size="md" color="indigo"
+                  size="md" color="teal"
                 />
               </Group>
               
               {form.values.useOracle && (
-                <Stack gap="sm" mt="xs">
+                <Stack gap="sm" mt="sm">
                   <TextInput
-                    label="오라클 덱 이름"
-                    placeholder="예: 문올로지 오라클, 로맨스 엔젤 등"
+                    className="bori-input"
+                    label="오라클 덱 명칭"
+                    placeholder="예: 영혼의 등불 오라클"
                     {...form.getInputProps('oracleDeckName')}
-                    radius="md" size="md"
+                    radius="md" size="sm"
                   />
-                  <FileInput
-                    label="오라클 카드 촬영 본"
-                    placeholder="터치하여 업로드"
-                    accept="image/*"
-                    leftSection={<IconUpload size={18} />}
-                    {...form.getInputProps('oracleImage')}
-                    radius="md" size="md"
-                  />
+                  <Box>
+                    <Text size="xs" mb={4} fw={600} opacity={0.7} c="#1A2F2F">• 오라클 조언 사진</Text>
+                    {!oraclePreview ? (
+                      <Paper 
+                        withBorder p="md" radius="md" 
+                        onClick={() => openUploadModal('oracle')}
+                        style={{ 
+                          cursor: 'pointer', borderStyle: 'dashed', backgroundColor: '#fff', borderColor: '#C5A059',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px'
+                        }}
+                      >
+                        <IconUpload size={24} color="#C5A059" stroke={1} />
+                        <Text size="xs" fw={700} c="#C5A059">비방 사진 업로드</Text>
+                      </Paper>
+                    ) : (
+                      <Box style={{ position: 'relative' }}>
+                        <AspectRatio ratio={16/9}>
+                          <Image src={oraclePreview} radius="md" alt="oracle preview" />
+                        </AspectRatio>
+                        <ActionIcon 
+                          variant="filled" color="red" radius="xl" size="sm"
+                          style={{ position: 'absolute', top: -8, right: -8, zIndex: 10 }}
+                          onClick={() => removeImage('oracle')}
+                        >
+                          <IconX size={12} />
+                        </ActionIcon>
+                      </Box>
+                    )}
+                  </Box>
                 </Stack>
               )}
             </Stack>
@@ -368,20 +561,14 @@ export default function TarotInputFormPage() {
             {form.values.bonusCards.map((_card, index) => (
               <Group key={index} gap="xs" wrap="nowrap">
                 <Select
+                  className="bori-input"
                   data={BONUS_CARD_DATA}
                   searchable
-                  maxDropdownHeight={280}
                   {...form.getInputProps(`bonusCards.${index}`)}
-                  radius="md"
-                  size="sm"
-                  style={{ flex: 1 }}
+                  radius="md" size="sm" style={{ flex: 1 }}
                 />
                 {form.values.bonusCards.length > 1 && (
-                  <ActionIcon 
-                    color="red" 
-                    variant="subtle" 
-                    onClick={() => form.removeListItem('bonusCards', index)}
-                  >
+                  <ActionIcon color="red" variant="subtle" onClick={() => form.removeListItem('bonusCards', index)}>
                     <IconTrash size={16} />
                   </ActionIcon>
                 )}
@@ -389,12 +576,9 @@ export default function TarotInputFormPage() {
             ))}
             {form.values.bonusCards.length < 5 && (
               <Button
-                variant="light"
-                color="indigo"
-                size="compact-xs"
+                variant="light" color="teal" size="compact-xs"
                 leftSection={<IconPlus size={14} />}
                 onClick={() => form.insertListItem('bonusCards', '선택안함')}
-                mt={2}
               >
                 조언 카드 추가
               </Button>
@@ -402,142 +586,131 @@ export default function TarotInputFormPage() {
           </Stack>
 
           <Select
-            label="6. 리딩 톤 앤 매너"
+            label="6. 리딩의 색채 (Ton & Manner)"
+            className="bori-input"
             data={['따뜻하고 공감적인 위로', '객관적이고 뼈때리는 팩트', '희망차고 긍정적인 응원', '전문적이고 심오한 분석']}
             {...form.getInputProps('toneAndManner')}
             radius="md" size="md"
           />
 
-          {/* 1단계: 분석하기 버튼 */}
           {step === 1 && (
             <Button 
-              size="lg" radius="xl" 
-              variant="outline" color="indigo"
-              leftSection={<IconSearch size={20} />}
-              mt="md"
-              onClick={analyzeCards}
+              size="lg"
+              className={tarotPreview ? "btn-oriental btn-oriental-teal ink-bleed-btn" : "btn-oriental"}
+              leftSection={<IconWand size={22} />}
+              mt="md" onClick={analyzeCards}
               loading={isAnalyzing}
-              disabled={isAnalyzing}
+              disabled={!tarotPreview || isAnalyzing}
             >
-              [1단계] 사진 속 카드 AI로 분석하기
+              [1단계] 이 기록으로 분석 시작
             </Button>
           )}
 
-          {/* 2단계: 결과 검토 영역 */}
           {step >= 2 && (
-            <Paper p="lg" radius="md" withBorder bg="indigo.0" style={{ borderColor: 'var(--mantine-color-indigo-2)' }}>
+            <Paper p="lg" radius="md" withBorder bg="rgba(26, 47, 47, 0.03)" style={{ borderColor: '#C5A059' }}>
               <Group justify="space-between" mb="md">
-                <Text fw={700} c="indigo.9">🔍 카드 인식 검토 및 수정</Text>
-                <Button size="xs" variant="light" color="indigo" onClick={addManualCard}>+ 카드 직접 추가</Button>
+                <Text fw={800} style={{ color: '#1A2F2F' }}>🔍 운명의 배열 검사 및 수정</Text>
+                <Button size="xs" variant="outline" color="teal" onClick={addManualCard}>+ 카드 수동 추가</Button>
               </Group>
               
-              {recognizedCards.length === 0 ? (
-                <Text size="sm" c="dimmed" ta="center" py="md">인식된 카드가 없습니다. 다시 시도하거나 직접 추가해주세요.</Text>
-              ) : (
-                <Stack gap="md">
-                  {recognizedCards.map((card, idx) => (
-                    <Group key={idx} align="flex-end" grow>
-                      <Select
-                        label={`${idx + 1}번 카드${card.positionLabel ? ` — ${card.positionLabel}` : ''}`}
-                        data={getCardSelectData(card.name)}
-                        searchable maxDropdownHeight={300}
-                        value={card.name}
-                        onChange={(val) => updateCardName(idx, val)}
-                        allowDeselect={false}
-                      />
-                      <Select
-                        label="정/역방향"
-                        data={['정방향', '역방향']}
-                        value={card.orientation}
-                        onChange={(val) => updateCardOrientation(idx, val)}
-                        style={{ maxWidth: '120px' }}
-                      />
-                      <ActionIcon
-                        color="red"
-                        variant="filled"
-                        size="xl"
-                        radius="md"
-                        mb={4}
-                        onClick={() => removeCard(idx)}
-                        title="카드 삭제"
-                      >
-                        <IconTrash size={20} />
-                      </ActionIcon>
-                    </Group>
-                  ))}
-                </Stack>
-              )}
+              <Stack gap="md">
+                {recognizedCards.map((card, idx) => (
+                  <Group key={idx} align="flex-end" grow>
+                    <Select
+                      label={`${idx + 1}번 기운${card.positionLabel ? ` — ${card.positionLabel}` : ''}`}
+                      data={getCardSelectData(card.name)}
+                      searchable value={card.name}
+                      onChange={(val) => updateCardName(idx, val)}
+                      className="bori-input"
+                    />
+                    <Select
+                      label="방향"
+                      data={['정방향', '역방향']}
+                      value={card.orientation}
+                      onChange={(val) => updateCardOrientation(idx, val)}
+                      style={{ maxWidth: '100px' }}
+                      className="bori-input"
+                    />
+                    <ActionIcon color="red" variant="filled" size="lg" radius="md" mb={4} onClick={() => removeCard(idx)}>
+                      <IconTrash size={18} />
+                    </ActionIcon>
+                  </Group>
+                ))}
+              </Stack>
 
               {step === 2 && (
                 <Button 
-                  fullWidth
-                  size="lg" radius="xl" 
-                  variant="gradient" gradient={{ from: 'indigo', to: 'cyan' }}
+                  fullWidth className="btn-oriental btn-oriental-teal" size="md"
                   leftSection={<IconWand size={20} />}
-                  mt="xl"
-                  onClick={generateFinalReading}
+                  mt="xl" onClick={generateFinalReading}
                   loading={isGenerating}
-                  disabled={isGenerating}
                 >
-                  [2단계] 검토 완료 및 최종 리딩 시작
+                  최종 비방 조제 (AI Insight)
                 </Button>
               )}
             </Paper>
           )}
 
-          {/* 3단계: AI 리딩 결과 영역 */}
           {step === 3 && readingResult && (
-            <Paper p="lg" radius="md" bg="var(--mantine-color-indigo-0)" style={{ border: '1px solid var(--mantine-color-indigo-2)' }}>
-              <Text fw={700} c="indigo.9" mb="xs">✨ 최종 AI 리딩 결과</Text>
+            <Paper p="lg" radius="md" bg="rgba(197, 160, 89, 0.05)" style={{ border: '1px solid #C5A059' }}>
+              <Text fw={900} style={{ color: '#1A2F2F' }} mb="xs">✨ AI 리딩 결과 (운명의 서)</Text>
               <Textarea 
                 value={readingResult}
                 onChange={(e) => setReadingResult(e.currentTarget.value)}
-                minRows={8}
-                autosize
-                radius="md"
+                minRows={8} autosize radius="md"
+                className="bori-input"
               />
             </Paper>
           )}
 
-          <Divider my="sm" label={<Text size="sm" c="dimmed">아래 정보를 입력하여 상담 내역을 저장하세요</Text>} labelPosition="center" />
+          <Divider my="sm" className="bori-divider" label={<Text size="sm" c="dimmed" fw={700}>상담 기록 보관</Text>} labelPosition="center" />
 
-          {/* CRM 로직 */}
           <TextInput
-            label="내담자 이름 (닉네임)"
-            placeholder="예: 김타로"
+            label="내담자 성함 / 별칭"
+            placeholder="예: 김아르카나"
+            className="bori-input"
             {...form.getInputProps('clientName')}
-            radius="md" size="md"
-            required
+            radius="md" size="md" required
           />
           <Group grow>
             <Select
-              label="상담 플랫폼"
+              label="상담 방편"
               data={['카카오톡', '크몽', '인스타그램', '네이버', '당근', '오프라인', '기타']}
+              className="bori-input"
               {...form.getInputProps('platform')}
               radius="md" size="md"
             />
             <NumberInput
-              label="결제 금액 (단가)"
-              placeholder="예: 50000"
+              label="상담 사례 (복채)"
+              placeholder="예: 30000"
               suffix=" 원"
+              className="bori-input"
               thousandSeparator
-              allowNegative={false}
               {...form.getInputProps('paymentAmount')}
               radius="md" size="md"
             />
           </Group>
 
           <Button 
-            size="lg" radius="xl" color="dark"
-            leftSection={<IconDeviceFloppy size={20} />}
-            mt="xl"
-            onClick={saveToCRM}
+            size="lg"
+            className="btn-seal-stamp"
+            leftSection={<IconDeviceFloppy size={22} />}
+            mt="xl" onClick={saveToCRM}
             loading={isSaving}
+            fullWidth
           >
-            상담 내용 및 CRM 저장
+            기록 관인 찍기 (Press Seal)
           </Button>
         </Stack>
       </Card>
+
+      {/* 📸 실시간 가이드라인 카메라 모달 */}
+      <CameraModal 
+        opened={cameraModalOpened} 
+        onClose={() => setCameraModalOpened(false)} 
+        onCapture={handleCapture}
+        spreadType={form.values.spreadType}
+      />
     </Container>
   );
 }

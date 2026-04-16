@@ -4,14 +4,15 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Title, Container, Table, Badge, Card, Group, ActionIcon, Text,
   Avatar, Modal, Stack, Paper, ScrollArea, Loader, Center,
-  Notification, Box, Tooltip, Button,
+  Notification, Box, Tooltip, Button, Radio,
 } from '@mantine/core';
 import {
   IconAddressBook, IconChevronRight, IconTrash, IconCheck, IconAlertCircle, IconFileDownload,
+  IconSun, IconMoonStars, IconPlant2,
 } from '@tabler/icons-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/context/AuthContext';
-import { generateTarotPDF } from '@/lib/TarotReportGenerator';
+import { generateTarotPDF, PDFTheme, TitleType } from '@/lib/TarotReportGenerator';
 import dayjs from 'dayjs';
 
 interface ClientInfo {
@@ -47,6 +48,11 @@ interface NotifState {
   icon: React.ReactNode;
 }
 
+const HANJI_BG = '#F9F7F2';
+const MAIN_INK = '#1A2F2F';
+const POINT_GOLD = '#C5A059';
+const SEAL_RED = '#8B0000';
+
 export default function ClientsDashboardPage() {
   const [clients, setClients] = useState<ClientInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +60,12 @@ export default function ClientsDashboardPage() {
   const [modalOpened, setModalOpened] = useState(false);
   const [notif, setNotif] = useState<NotifState | null>(null);
   const [pdfLoading, setPdfLoading] = useState<string | null>(null);
+  
+  // PDF 옵션 모달 상태
+  const [exportModalOpened, setExportModalOpened] = useState(false);
+  const [selectedSessionForPdf, setSelectedSessionForPdf] = useState<SessionInfo | null>(null);
+  const [pdfTheme, setPdfTheme] = useState<PDFTheme>('oriental');
+  const [pdfTitleType, setPdfTitleType] = useState<TitleType>('standard');
   
   const supabase = createClient();
   const { user } = useAuth();
@@ -117,7 +129,12 @@ export default function ClientsDashboardPage() {
 
   // ─── 개별 상담 기록 삭제 ─────────────────────────────────────
   const deleteSession = async (sessionId: string) => {
-    const confirmed = window.confirm('해당 상담 기록을 삭제하시겠습니까?');
+    const sessionToDelete = selectedClient?.sessions.find(s => s.id === sessionId);
+    const amountToDeduct = sessionToDelete?.payment_amount || 0;
+
+    const confirmed = window.confirm(
+      `해당 상담 기록을 비밀 명부에서 영구히 말소하시겠습니까?\n이 작업은 되돌릴 수 없으며, 마스터님의 통계 데이터에서도 즉시 차감됩니다.`
+    );
     if (!confirmed) return;
 
     try {
@@ -128,13 +145,7 @@ export default function ClientsDashboardPage() {
 
       if (error) throw error;
 
-      // selectedClient 상태 업데이트
-      setSelectedClient((prev) => {
-        if (!prev) return prev;
-        return { ...prev, sessions: prev.sessions.filter((s) => s.id !== sessionId) };
-      });
-
-      // clients 목록의 해당 고객 세션도 갱신
+      // 1. 전체 clients 목록 갱신 (전역적 통계 반영)
       setClients((prev) =>
         prev.map((c) =>
           c.id === selectedClient?.id
@@ -143,9 +154,15 @@ export default function ClientsDashboardPage() {
         )
       );
 
-      showNotif('상담 기록이 삭제되었습니다.');
+      // 2. 현재 선택된 고객의 상세 모달 상태 갱신
+      setSelectedClient((prev) => {
+        if (!prev) return prev;
+        return { ...prev, sessions: prev.sessions.filter((s) => s.id !== sessionId) };
+      });
+
+      showNotif(`상담 기록이 말소되었습니다. (차감액: ${amountToDeduct.toLocaleString()}원)`);
     } catch (err: any) {
-      showNotif('삭제 중 오류가 발생했습니다.', true);
+      showNotif('말소 처리 중 오류가 발생했습니다.', true);
       console.error(err);
     }
   };
@@ -163,23 +180,34 @@ export default function ClientsDashboardPage() {
   };
 
   // ─── PDF 생성 ─────────────────────────────────────────────
-  const handleDownloadPDF = async (session: SessionInfo) => {
-    if (!selectedClient) return;
-    setPdfLoading(session.id);
+  const handleDownloadPDF = (session: SessionInfo) => {
+    setSelectedSessionForPdf(session);
+    setExportModalOpened(true);
+  };
+
+  const executePdfDownload = async () => {
+    if (!selectedClient || !selectedSessionForPdf) return;
+    
+    setPdfLoading(selectedSessionForPdf.id);
+    setExportModalOpened(false);
+    
     try {
       await generateTarotPDF({
         clientName: selectedClient.name,
         masterNickname: masterNickname,
-        category: session.category,
-        date: dayjs(session.created_at).format('YYYY-MM-DD HH:mm'),
-        readingResult: session.ai_reading_result,
-        cardImages: session.card_images || []
+        category: selectedSessionForPdf.category,
+        date: dayjs(selectedSessionForPdf.created_at).format('YYYY-MM-DD HH:mm'),
+        readingResult: selectedSessionForPdf.ai_reading_result,
+        cardImages: selectedSessionForPdf.card_images || [],
+        theme: pdfTheme,
+        titleType: pdfTitleType,
       });
-      showNotif('PDF 보고서가 생성되었습니다.');
+      showNotif('PDF 보고서가 성공적으로 생성되었습니다.');
     } catch (err) {
       showNotif('PDF 생성 중 오류가 발생했습니다.', true);
     } finally {
       setPdfLoading(null);
+      setSelectedSessionForPdf(null);
     }
   };
 
@@ -202,26 +230,41 @@ export default function ClientsDashboardPage() {
     const statusBadge = totalSessions >= 5 ? '단골' : totalSessions >= 2 ? '재방문' : '신규';
 
     return (
-      <Table.Tr key={client.id}>
+      <Table.Tr key={client.id} style={{ borderBottom: `1px solid ${MAIN_INK}11` }}>
         <Table.Td>
           <Group gap="sm" onClick={() => openClientDetails(client)} style={{ cursor: 'pointer' }}>
-            <Avatar color="indigo" radius="xl">{client.name.charAt(0)}</Avatar>
-            <Text size="sm" fw={700} c="indigo.7" style={{ textDecoration: 'underline' }}>
+            <Avatar color="dark" radius="md" style={{ border: `1px solid ${POINT_GOLD}` }}>{client.name.charAt(0)}</Avatar>
+            <Text size="sm" fw={800} c={MAIN_INK} className="font-serif" style={{ textDecoration: 'underline', textUnderlineOffset: '4px' }}>
               {client.name}
             </Text>
           </Group>
         </Table.Td>
         <Table.Td>
-          <Badge variant="light" color="gray">{client.platform}</Badge>
+          <Badge 
+            variant="filled" 
+            style={{ 
+              backgroundColor: SEAL_RED, 
+              color: HANJI_BG, 
+              borderRadius: 2, 
+              fontFamily: 'var(--font-serif)',
+              fontSize: '10px',
+              padding: '4px 6px',
+              height: 'auto'
+            }}
+          >
+            {client.platform}
+          </Badge>
         </Table.Td>
-        <Table.Td>{lastReadingType}</Table.Td>
-        <Table.Td>{lastVisit}</Table.Td>
-        <Table.Td>{totalSessions}회</Table.Td>
-        <Table.Td>{totalPaid.toLocaleString()}원</Table.Td>
+        <Table.Td className="font-serif">{lastReadingType}</Table.Td>
+        <Table.Td style={{ opacity: 0.6 }}>{lastVisit}</Table.Td>
+        <Table.Td fw={700}>{totalSessions}회</Table.Td>
+        <Table.Td fw={900} c={SEAL_RED} style={{ letterSpacing: '0.5px' }}>
+          {totalPaid.toLocaleString()}원
+        </Table.Td>
         <Table.Td>
           <Badge
-            color={statusBadge === '단골' ? 'grape' : statusBadge === '재방문' ? 'indigo' : 'cyan'}
-            variant="filled"
+            variant="outline"
+            style={{ color: MAIN_INK, borderColor: MAIN_INK, borderRadius: 2, fontSize: '10px' }}
           >
             {statusBadge}
           </Badge>
@@ -229,16 +272,17 @@ export default function ClientsDashboardPage() {
         {/* 상세 + 삭제 버튼 */}
         <Table.Td>
           <Group gap="xs" wrap="nowrap">
-            <Tooltip label="상세 보기" withArrow>
-              <ActionIcon variant="subtle" color="indigo" radius="xl" onClick={() => openClientDetails(client)}>
+            <Tooltip label="비밀 명부 확인" withArrow>
+              <ActionIcon variant="subtle" color="dark" radius="md" onClick={() => openClientDetails(client)}>
                 <IconChevronRight size="1.2rem" stroke={2} />
               </ActionIcon>
             </Tooltip>
-            <Tooltip label="고객 삭제" withArrow color="red">
+            <Tooltip label="기록 말소" withArrow color="red">
               <ActionIcon
-                variant="subtle"
+                variant="light"
                 color="red"
-                radius="xl"
+                radius="md"
+                style={{ backgroundColor: 'rgba(139, 46, 46, 0.05)', border: '1px solid rgba(139, 46, 46, 0.1)' }}
                 onClick={(e) => deleteClient(client, e)}
               >
                 <IconTrash size="1.1rem" stroke={2} />
@@ -251,37 +295,39 @@ export default function ClientsDashboardPage() {
   });
 
   return (
-    <Container size="xl" py="xl">
+    <Container size="xl" py="xl" style={{ backgroundColor: HANJI_BG, minHeight: '100vh', backgroundImage: "url('https://www.transparenttextures.com/patterns/paper-fibers.png')" }}>
       <Group mb="xl" align="center">
-        <IconAddressBook size={32} color="var(--mantine-color-indigo-6)" />
-        <Title order={2} style={{ letterSpacing: '-0.5px' }}>내담자 관리 대시보드</Title>
+        <IconAddressBook size={32} color={MAIN_INK} />
+        <Title order={2} className="font-serif" style={{ letterSpacing: '-1px', color: MAIN_INK, fontWeight: 900 }}>
+          아르카나 랩 | 내담자 비밀 명부
+        </Title>
       </Group>
 
-      <Card shadow="sm" radius="xl" withBorder padding="0" style={{ overflow: 'hidden', minHeight: 400 }}>
+      <Paper shadow="xs" p="0" style={{ background: 'transparent', minHeight: 400 }}>
         {loading ? (
           <Center h={400}>
-            <Loader color="indigo" />
+            <Loader color={POINT_GOLD} />
           </Center>
         ) : (
           <Table.ScrollContainer minWidth={880}>
-            <Table verticalSpacing="md" horizontalSpacing="lg" striped highlightOnHover>
-              <Table.Thead bg="var(--mantine-color-gray-0)">
+            <Table verticalSpacing="lg" horizontalSpacing="lg">
+              <Table.Thead borderBottom={`2px solid ${MAIN_INK}`}>
                 <Table.Tr>
-                  <Table.Th><Text size="xs" c="dimmed" fw={600} tt="uppercase">이름 (닉네임)</Text></Table.Th>
-                  <Table.Th><Text size="xs" c="dimmed" fw={600} tt="uppercase">유입 플랫폼</Text></Table.Th>
-                  <Table.Th><Text size="xs" c="dimmed" fw={600} tt="uppercase">최근 상담 종류</Text></Table.Th>
-                  <Table.Th><Text size="xs" c="dimmed" fw={600} tt="uppercase">최근 방문일</Text></Table.Th>
-                  <Table.Th><Text size="xs" c="dimmed" fw={600} tt="uppercase">상담 횟수</Text></Table.Th>
-                  <Table.Th><Text size="xs" c="dimmed" fw={600} tt="uppercase">누적 결제 금액</Text></Table.Th>
-                  <Table.Th><Text size="xs" c="dimmed" fw={600} tt="uppercase">고객 분류</Text></Table.Th>
-                  <Table.Th><Text size="xs" c="dimmed" fw={600} tt="uppercase">작업</Text></Table.Th>
+                  <Table.Th><Text size="xs" c={MAIN_INK} fw={900} className="font-serif">내담자 성함</Text></Table.Th>
+                  <Table.Th><Text size="xs" c={MAIN_INK} fw={900} className="font-serif">유입 방편</Text></Table.Th>
+                  <Table.Th><Text size="xs" c={MAIN_INK} fw={900} className="font-serif">최근 비망</Text></Table.Th>
+                  <Table.Th><Text size="xs" c={MAIN_INK} fw={900} className="font-serif">최근 내방일</Text></Table.Th>
+                  <Table.Th><Text size="xs" c={MAIN_INK} fw={900} className="font-serif">인연 횟수</Text></Table.Th>
+                  <Table.Th><Text size="xs" c={MAIN_INK} fw={900} className="font-serif">누적 복채</Text></Table.Th>
+                  <Table.Th><Text size="xs" c={MAIN_INK} fw={900} className="font-serif">인연 분류</Text></Table.Th>
+                  <Table.Th><Text size="xs" c={MAIN_INK} fw={900} className="font-serif">관리</Text></Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
                 {rows.length > 0 ? rows : (
                   <Table.Tr>
                     <Table.Td colSpan={8}>
-                      <Text ta="center" py="xl" c="dimmed">등록된 내담자가 없습니다.</Text>
+                      <Text ta="center" py={100} c="dimmed" className="font-serif">기록된 인연이 아직 없습니다.</Text>
                     </Table.Td>
                   </Table.Tr>
                 )}
@@ -289,30 +335,52 @@ export default function ClientsDashboardPage() {
             </Table>
           </Table.ScrollContainer>
         )}
-      </Card>
+      </Paper>
+
 
       {/* ─── 고객 상세 모달 ───────────────────────────────────── */}
       <Modal
         opened={modalOpened}
         onClose={() => setModalOpened(false)}
-        title={<Text size="xl" fw={700}>내담자 상세: {selectedClient?.name}</Text>}
+        title={<Text size="xl" fw={900} className="font-serif" color={MAIN_INK}>내담자 비밀 명부: {selectedClient?.name}</Text>}
         size="xl"
         centered
+        styles={{
+          content: { 
+            backgroundColor: HANJI_BG, 
+            backgroundImage: "url('https://www.transparenttextures.com/patterns/paper-fibers.png')",
+            border: `2px solid ${POINT_GOLD}`
+          }
+        }}
         scrollAreaComponent={ScrollArea.Autosize}
       >
         {selectedClient && (
           <Stack gap="xl">
             <Group>
-              <Badge size="lg" variant="light" color="blue">플랫폼: {selectedClient.platform}</Badge>
-              <Badge size="lg" variant="dot" color="indigo">총 상담 횟수: {selectedClient.sessions.length}회</Badge>
-              <Badge size="lg" variant="dot" color="teal">
-                누적 금액: {selectedClient.sessions.reduce((acc, curr) => acc + (curr.payment_amount || 0), 0).toLocaleString()}원
+              <Badge 
+                size="lg" variant="filled" 
+                style={{ backgroundColor: SEAL_RED, borderRadius: 2, fontFamily: 'var(--font-serif)' }}
+              >
+                플랫폼: {selectedClient.platform}
+              </Badge>
+              <Badge 
+                size="lg" variant="outline" 
+                style={{ color: MAIN_INK, borderColor: MAIN_INK, borderRadius: 2 }}
+              >
+                총 상담 횟수: {selectedClient.sessions.length}회
+              </Badge>
+              <Badge 
+                size="lg" variant="outline" 
+                style={{ color: SEAL_RED, borderColor: SEAL_RED, borderRadius: 2 }}
+              >
+                누적 복채: {selectedClient.sessions.reduce((acc, curr) => acc + (curr.payment_amount || 0), 0).toLocaleString()}원
               </Badge>
             </Group>
 
-            <Text size="lg" fw={700} pb="xs" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
-              과거 상담 기록
-            </Text>
+            <Title order={4} className="font-serif" c={MAIN_INK} pb="xs" style={{ borderBottom: `1.5px solid ${MAIN_INK}` }}>
+              과거 비망록 (상담 기록)
+            </Title>
+
 
             {selectedClient.sessions.length > 0 ? (
               selectedClient.sessions.map((session) => (
@@ -410,6 +478,74 @@ export default function ClientsDashboardPage() {
             )}
           </Stack>
         )}
+      </Modal>
+
+      {/* ─── PDF 출력 옵션 모달 ────────────────────────────────── */}
+      <Modal
+        opened={exportModalOpened}
+        onClose={() => setExportModalOpened(false)}
+        title={<Text size="lg" fw={800} style={{ fontFamily: 'var(--font-serif)' }}>리포트 출력 옵션 설정</Text>}
+        centered
+        radius="md"
+        size="md"
+      >
+        <Stack gap="xl">
+          <Box>
+            <Text fw={700} size="sm" mb="xs">1. 원하시는 보고서 테마를 선택하세요</Text>
+            <Radio.Group value={pdfTheme} onChange={(val) => setPdfTheme(val as PDFTheme)}>
+              <Stack gap="sm">
+                <Paper withBorder p="sm" radius="md" style={{ borderColor: pdfTheme === 'oriental' ? 'var(--bori-gold)' : undefined }}>
+                  <Radio value="oriental" label={
+                    <Group gap="xs">
+                      <IconPlant2 size={16} color="var(--bori-gold)" />
+                      <Text size="sm" fw={pdfTheme === 'oriental' ? 700 : 400}>동양풍 (Oriental)</Text>
+                      <Text size="xs" c="dimmed">한지 질감, 고서 느낌의 전통적 디자인</Text>
+                    </Group>
+                  } />
+                </Paper>
+                <Paper withBorder p="sm" radius="md" style={{ borderColor: pdfTheme === 'western' ? '#7950f2' : undefined }}>
+                  <Radio value="western" label={
+                    <Group gap="xs">
+                      <IconMoonStars size={16} color="#7950f2" />
+                      <Text size="sm" fw={pdfTheme === 'western' ? 700 : 400}>서양풍 (Western)</Text>
+                      <Text size="xs" c="dimmed">신비로운 아우라, 화려한 정통 타로 테마</Text>
+                    </Group>
+                  } />
+                </Paper>
+                <Paper withBorder p="sm" radius="md" style={{ borderColor: pdfTheme === 'minimal' ? 'gray' : undefined }}>
+                  <Radio value="minimal" label={
+                    <Group gap="xs">
+                      <IconSun size={16} />
+                      <Text size="sm" fw={pdfTheme === 'minimal' ? 700 : 400}>기본/미니멀 (Minimal)</Text>
+                      <Text size="xs" c="dimmed">깔끔한 웰니스 센터 스타일의 전문 보고서</Text>
+                    </Group>
+                  } />
+                </Paper>
+              </Stack>
+            </Radio.Group>
+          </Box>
+
+          <Box>
+            <Text fw={700} size="sm" mb="xs">2. 상단 타이틀 브랜딩 형식을 선택하세요</Text>
+            <Radio.Group value={pdfTitleType} onChange={(val) => setPdfTitleType(val as TitleType)}>
+              <Stack gap="xs">
+                <Radio value="standard" label={<Text size="sm">Tarot Consult by {masterNickname}</Text>} />
+                <Radio value="record" label={<Text size="sm">{masterNickname}의 운명 기록부</Text>} />
+                <Radio value="nameOnly" label={<Text size="sm">{masterNickname}</Text>} />
+              </Stack>
+            </Radio.Group>
+          </Box>
+
+          <Button 
+            fullWidth 
+            className="btn-seal" 
+            size="md" 
+            onClick={executePdfDownload}
+            leftSection={<IconFileDownload size={18} />}
+          >
+            PDF 리포트 생성 및 저장
+          </Button>
+        </Stack>
       </Modal>
 
       {/* ─── 플로팅 토스트 알림 ──────────────────────────────────── */}

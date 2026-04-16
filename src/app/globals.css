@@ -1,5 +1,181 @@
-/* 글로벌 스타일 (Mainly empty because Mantine handles resets) */
+:root {
+  --bori-bg: #F9F7F2; /* 한지 베이지 */
+  --bori-deep: #1A2F2F; /* 심해 청록 */
+  --bori-gold: #C5A059; /* 금색 */
+  --bori-seal: #8B2E2E; /* 전통 인장 대추색 */
+  --bori-text: #1A1A1A; /* 명확한 먹색 */
+  --bori-bamboo: #3A4D39; /* 대나무 그린 */
+  --bori-ivory: #FDFCF0; /* 고풍스러운 아이보리 */
+}
+
 body {
   margin: 0;
   padding: 0;
+  background-color: var(--bori-bg);
+  color: var(--bori-text);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3e%3cfilter id='noiseFilter'%3e%3ctfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3e%3c/svg%3e");
+  font-family: var(--font-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-serif {
+  font-family: var(--font-serif), serif !important;
+}
+
+/* 얇은 금색 테두리 카드 */
+.bori-card {
+  border: 1px solid var(--bori-gold) !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 30px rgba(26, 47, 47, 0.04) !important;
+  border-radius: 4px !important;
+}
+
+/* 한지 스타일 입력창 */
+.bori-input input, 
+.bori-input textarea, 
+.bori-input select,
+.mantine-Input-input {
+  border: 1px solid rgba(197, 160, 89, 0.3) !important;
+  border-radius: 4px !important;
+  transition: all 0.3s ease !important;
+  background-color: var(--bori-bg) !important; /* 한지 베이지 */
+  color: var(--bori-text) !important; /* 먹색 */
+  font-size: 15px;
+}
+
+.bori-input input:focus, 
+.bori-input textarea:focus, 
+.bori-input select:focus,
+.mantine-Input-input:focus {
+  border-color: var(--bori-gold) !important;
+  box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.1) !important;
+  background-color: #fff !important;
+}
+
+/* 드롭다운(Select) 버그 해결 및 테마 적용 */
+.mantine-Select-dropdown,
+.mantine-Combobox-dropdown {
+  background-color: var(--bori-bg) !important;
+  border: 1px solid var(--bori-gold) !important;
+  box-shadow: 0 10px 30px rgba(26, 47, 47, 0.15) !important;
+}
+
+.mantine-Select-option,
+.mantine-Combobox-option {
+  color: var(--bori-text) !important;
+  padding: 10px 12px !important;
+  transition: background 0.2s ease;
+}
+
+.mantine-Select-option[data-checked],
+.mantine-Combobox-option[data-combobox-selected] {
+  background-color: var(--bori-gold) !important;
+  color: #fff !important;
+}
+
+.mantine-Select-option:hover,
+.mantine-Combobox-option:hover,
+.mantine-Combobox-option[data-combobox-active] {
+  background-color: rgba(197, 160, 89, 0.1) !important;
+  color: var(--bori-deep) !important;
+}
+
+/* 전통 버튼 공통 스타일 */
+.btn-oriental {
+  border-radius: 4px !important;
+  border: 1px solid var(--bori-gold) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-oriental:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(197, 160, 89, 0.3) !important;
+}
+
+/* 분석하기: 심해 청록 스타일 */
+.btn-oriental-teal {
+  background-color: var(--bori-deep) !important;
+  color: var(--bori-gold) !important;
+}
+
+.btn-oriental-teal:hover {
+  filter: brightness(1.2);
+}
+
+/* 저장하기: 전통 인장 대추색 스타일 */
+.btn-oriental-jujube {
+  background-color: var(--bori-seal) !important;
+  color: var(--bori-ivory) !important;
+}
+
+.btn-oriental-jujube:hover {
+  filter: brightness(1.1);
+}
+
+/* 🧱 진짜 인감을 찍는 듯한 전통 인장 스타일 */
+.btn-seal-stamp {
+  background-color: transparent !important;
+  color: var(--bori-seal) !important;
+  border: 3px double var(--bori-seal) !important;
+  border-radius: 2px !important;
+  font-family: var(--font-serif), serif !important;
+  font-weight: 900 !important;
+  letter-spacing: 2px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-shadow: 0.5px 0.5px 1px rgba(139, 46, 46, 0.2);
+}
+
+.btn-seal-stamp:hover {
+  background-color: rgba(139, 46, 46, 0.05) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 46, 46, 0.1);
+}
+
+.btn-seal-stamp:active {
+  transform: scale(0.95);
+  background-color: rgba(139, 46, 46, 0.15) !important;
+}
+
+/* 인장 버튼 내 거친 질감 효과 */
+.btn-seal-stamp::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3e%3cfilter id='noise'%3e%3ctfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.1'/%3e%3c/svg%3e");
+  pointer-events: none;
+}
+
+/* 🖱️ 네비게이션 및 메뉴 호버 시인성 수정 */
+.mantine-NavLink-root:hover,
+.mantine-Tabs-tab:hover,
+.mantine-Menu-item:hover {
+  background-color: rgba(197, 160, 89, 0.08) !important;
+  color: var(--bori-deep) !important;
+  border-bottom: 1px dashed var(--bori-gold) !important;
+}
+
+.mantine-NavLink-root[data-active],
+.mantine-Tabs-tab[data-active] {
+  background-color: var(--bori-deep) !important;
+  color: var(--bori-gold) !important;
+}
+
+/* 붓터치 구분선 */
+.bori-divider {
+  border-top: 1px solid rgba(197, 160, 89, 0.2) !important;
+  position: relative;
+}
+
+.bori-divider::after {
+  content: '';
+  position: absolute;
+  top: -1px; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--bori-gold), transparent);
+  opacity: 0.5;
 }

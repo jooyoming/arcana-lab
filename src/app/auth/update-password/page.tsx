@@ -12,7 +12,7 @@ import {
   Alert,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconAlertCircle, IconLock, IconCheck } from '@tabler/icons-react';
+import { IconAlertCircle, IconLock, IconCheck, IconCircleLetterA } from '@tabler/icons-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -59,12 +59,12 @@ export default function UpdatePasswordPage() {
   return (
     <Container size={420} my={80}>
       <Stack align="center" mb={30}>
-        <IconLock size={40} color="var(--mantine-color-violet-filled)" />
-        <Title order={2} ta="center" fw={900}>
+        <IconCircleLetterA size={50} color="var(--bori-gold)" stroke={1.5} />
+        <Title order={2} ta="center" style={{ fontFamily: 'var(--font-serif)', color: 'var(--bori-deep)' }}>
           새 비밀번호 설정
         </Title>
         <Text c="dimmed" size="sm" ta="center">
-          새롭게 사용할 비밀번호를 입력해 주세요.
+          아르카나 랩 계정의 새로운 비밀번호를 입력해 주세요.
         </Text>
       </Stack>
 
@@ -101,7 +101,7 @@ export default function UpdatePasswordPage() {
               />
             </Stack>
 
-            <Button type="submit" fullWidth mt="xl" loading={loading} color="violet">
+            <Button type="submit" fullWidth mt="xl" loading={loading} className="btn-seal" size="md">
               비밀번호 변경하기
             </Button>
           </form>
