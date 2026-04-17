@@ -208,25 +208,25 @@ export default function DashboardPage() {
         </Paper>
 
         {/* 📊 성과 요약 (동양풍 카드) */}
-        <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg">
+        <SimpleGrid cols={{ base: 1, xs: 2, sm: 3 }} spacing={{ base: 'md', sm: 'lg' }}>
           {statCards.map((stat, idx) => (
             <Card 
               key={stat.title} 
               className="bori-card" 
-              p="xl"
+              p={{ base: 'md', sm: 'xl' }}
               onClick={stat.onClick}
               style={{ cursor: stat.onClick ? 'pointer' : 'default' }}
             >
-              <Group justify="space-between" mb="xs">
-                <Text size="xs" c="dimmed" fw={700} tt="uppercase" style={{ letterSpacing: '1px' }}>{stat.title}</Text>
-                <ThemeIcon variant="light" color={stat.color} size="md" radius="sm">
+              <Group justify="space-between" mb="xs" wrap="nowrap">
+                <Text size="xs" c="dimmed" fw={700} tt="uppercase" style={{ letterSpacing: '1px', whiteSpace: 'nowrap' }}>{stat.title}</Text>
+                <ThemeIcon variant="light" color={stat.color} size="md" radius="sm" style={{ flexShrink: 0 }}>
                   {stat.icon}
                 </ThemeIcon>
               </Group>
               {loading ? (
                 <Skeleton height={32} width={100} radius="xs" mt="sm" />
               ) : (
-                <Text mt="xs" fz={28} fw={800} style={{ color: `var(--bori-deep)`, fontFamily: 'var(--font-serif)' }}>
+                <Text mt="xs" fz={{ base: 24, sm: 28 }} fw={800} style={{ color: `var(--bori-deep)`, fontFamily: 'var(--font-serif)', whiteSpace: 'nowrap' }}>
                   {stat.value}
                 </Text>
               )}

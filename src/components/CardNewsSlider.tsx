@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Box, Text, Group, Stack, Paper, Title } from '@mantine/core';
+import { Box, Text, Group, Stack, Paper, Title, ScrollArea } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 
 // ── 타입 ─────────────────────────────────────────────────────────────────
@@ -158,16 +158,18 @@ export function CardNewsSlider({ slides, date }: { slides: TipSlide[]; date: str
           <Text size="xs" c="dimmed" fw={600}>{idx} / {totalSlides - 2}</Text>
         </Group>
 
-        <Box style={{ flex: 1 }}>
-          <Text style={{ fontSize: 40, marginBottom: 20 }}>{slide.emoji}</Text>
-          <Title order={3} className="font-serif" style={{ fontSize: 24, color: 'var(--bori-deep)', marginBottom: 20, lineHeight: 1.4 }}>
-            {slide.title}
-          </Title>
-          <Box h={1} w="100%" bg="rgba(197, 160, 89, 0.2)" mb="lg" />
-          <Text size="md" style={{ lineHeight: 1.9, color: 'var(--bori-text)', textAlign: 'justify' }}>
-            {slide.body}
-          </Text>
-        </Box>
+        <ScrollArea.Autosize mah="100%" style={{ flex: 1 }} type="scroll" scrollbarSize={2}>
+          <Box pr="sm">
+            <Text style={{ fontSize: 40, marginBottom: 20 }}>{slide.emoji}</Text>
+            <Title order={3} className="font-serif" style={{ fontSize: 24, color: 'var(--bori-deep)', marginBottom: 20, lineHeight: 1.4, wordBreak: 'keep-all' }}>
+              {slide.title}
+            </Title>
+            <Box h={1} w="100%" bg="rgba(197, 160, 89, 0.2)" mb="lg" />
+            <Text size="md" style={{ lineHeight: 1.9, color: 'var(--bori-text)', textAlign: 'justify', wordBreak: 'keep-all' }}>
+              {slide.body}
+            </Text>
+          </Box>
+        </ScrollArea.Autosize>
 
         <Box mt="auto" pt="xl">
           <Text size="10px" c="var(--bori-gold)" fw={800} ta="center" style={{ letterSpacing: 4, borderTop: '1px solid rgba(197, 160, 89, 0.1)', paddingTop: 12 }}>

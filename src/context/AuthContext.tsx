@@ -8,6 +8,8 @@ import { useRouter } from 'next/navigation';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+  grade: string | null;
+  isVerified: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
 }
@@ -17,9 +19,33 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [grade, setGrade] = useState<string | null>(null);
+  const [isVerified, setIsVerified] = useState(false);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
   const router = useRouter();
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('grade, is_verified')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.warn('프로필 정보를 불러올 수 없습니다 (SQL 미실행 가능성):', error.message);
+        return;
+      }
+
+      if (data) {
+        setGrade(data.grade);
+        setIsVerified(data.is_verified);
+      }
+    } catch (e) {
+      console.error('fetchProfile 중 예기치 못한 오류:', e);
+    }
+  };
 
   useEffect(() => {
     const setData = async () => {
@@ -27,6 +53,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
       setSession(session);
       setUser(session?.user ?? null);
+      if (session?.user) {
+        await fetchProfile(session.user.id);
+      }
       setLoading(false);
     };
 
@@ -34,9 +63,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user.id);
+        } else {
+          setGrade(null);
+          setIsVerified(false);
+        }
         setLoading(false);
-        // 세션 상태가 변하면 서버 사이드 쿠키 동기화를 위해 페이지 리프레시 고려
-        router.refresh();
       }
     );
 
@@ -53,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut }}>
+    <AuthContext.Provider value={{ user, session, grade, isVerified, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );

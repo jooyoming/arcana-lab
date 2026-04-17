@@ -456,7 +456,7 @@ export default function ClientsDashboardPage() {
 
                   <Text size="sm" fw={600} mt="md">내담자 상황</Text>
                   <Paper p="sm" withBorder mt={4} bg="white">
-                    <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
+                    <Text size="sm" style={{ whiteSpace: 'pre-wrap', wordBreak: 'keep-all' }}>
                       {session.situation || '입력된 상황이 없습니다.'}
                     </Text>
                   </Paper>
@@ -467,7 +467,7 @@ export default function ClientsDashboardPage() {
                     bg="var(--mantine-color-indigo-0)"
                     style={{ borderColor: 'var(--mantine-color-indigo-2)' }}
                   >
-                    <Text size="sm" style={{ whiteSpace: 'pre-wrap' }} c="indigo.9">
+                    <Text size="sm" style={{ whiteSpace: 'pre-wrap', wordBreak: 'keep-all' }} c="indigo.9">
                       {session.ai_reading_result}
                     </Text>
                   </Paper>

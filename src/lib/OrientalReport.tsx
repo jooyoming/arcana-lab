@@ -7,13 +7,13 @@ import { Page, Text, View, Document, StyleSheet, Font, Image } from '@react-pdf/
 // Note: @react-pdf/renderer에서 한글을 사용하려면 반드시 ttf/woff 폰트를 등록해야 함
 Font.register({
   family: 'Noto Serif KR',
-  src: 'https://fonts.gstatic.com/s/notoserifkr/v12/6qL47Zia4vjt_TEnv_UnF5yp3ZpY.ttf', // Google CDN - Regular
+  src: 'https://fonts.gstatic.com/s/notoserifkr/v31/3JnoSDn90Gmq2mr3blnHaTZXbOtLJDvui3JOncjmeM52.ttf',
   fontWeight: 'normal',
 });
 
 Font.register({
   family: 'Noto Serif KR',
-  src: 'https://fonts.gstatic.com/s/notoserifkr/v12/6qL77Zia4vjt_TEnv_UnF5yp3ZpgSLo.ttf', // Google CDN - Bold
+  src: 'https://fonts.gstatic.com/s/notoserifkr/v31/3JnoSDn90Gmq2mr3blnHaTZXbOtLJDvui3JOncgBf852.ttf',
   fontWeight: 'bold',
 });
 

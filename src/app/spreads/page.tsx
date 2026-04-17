@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container, Title, Text, Group, Box, Badge, Modal, Divider, SimpleGrid, Tooltip, Stack,
 } from '@mantine/core';
@@ -453,7 +453,29 @@ export default function SpreadsGuidePage() {
 
   const handleCardClick = (spread: SpreadType) => {
     setSelectedSpread(spread);
+    // History API를 이용해 뒤로가기 시 모달만 닫히도록 설정
+    window.history.pushState({ modal: 'spread-guide' }, '');
     open();
+  };
+
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (opened) {
+        close();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [opened, close]);
+
+  const handleClose = () => {
+    if (opened) {
+      if (window.history.state?.modal === 'spread-guide') {
+        window.history.back();
+      }
+      close();
+    }
   };
 
   return (
@@ -559,7 +581,7 @@ export default function SpreadsGuidePage() {
         </Group>
       </Container>
 
-      <SpreadModal spread={selectedSpread} opened={opened} onClose={close} />
+      <SpreadModal spread={selectedSpread} opened={opened} onClose={handleClose} />
     </Box>
   );
 }

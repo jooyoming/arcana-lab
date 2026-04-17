@@ -33,7 +33,18 @@ export function CameraOverlay({ spreadType }: CameraOverlayProps) {
       }}
     >
       {/* 가이드라인 컨테이너 (실제 촬영 영역에 맞춤) */}
-      <Box style={{ position: 'relative', width: '100%', height: '100%', transform: `scale(${spread.scale || 1})` }}>
+      <Box 
+        style={{ 
+          position: 'relative', 
+          width: '100%', 
+          maxWidth: '500px', // 모바일 가로폭 고려
+          aspectRatio: '3/4', // 일반적인 카메라 프리뷰 비율
+          transform: `scale(${spread.scale || 1})`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
         {spread.layout.map((pos, idx) => {
           // 가로 가이드 세로 길이를 기준으로 카드 비율(약 1:1.6) 적용
           const cardW = 12; // % 기준

@@ -4,12 +4,20 @@ import { createClient } from '@/lib/supabase/server';
 import { SPREAD_TYPES } from '@/lib/tarotData';
 import { sortCardsBySpread, type DetectedCard } from '@/lib/spreadSorter';
 
+import { checkAndIncrementUsage } from '@/lib/usage';
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: '인증이 필요합니다.' }, { status: 401 });
+  }
+
+  // 사용량 체크
+  const usageStatus = await checkAndIncrementUsage(supabase, user.id);
+  if (!usageStatus.canUse) {
+    return NextResponse.json({ error: usageStatus.message }, { status: 403 });
   }
 
   try {
