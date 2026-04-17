@@ -13,9 +13,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
 
-  // 인증 관련 페이지에서는 사이드바를 숨김
   if (pathname?.startsWith('/auth')) {
-    return <main>{children}</main>;
+    return (
+      <main>
+        <GateSplash />
+        {children}
+      </main>
+    );
   }
 
   return (
