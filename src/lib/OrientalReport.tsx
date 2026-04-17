@@ -17,10 +17,17 @@ Font.register({
   fontWeight: 'bold',
 });
 
+// 이모지 지원: Twemoji PNG 소스 등록 (깨짐 방지 및 컬러 지원)
+Font.registerEmojiSource({
+  format: 'png',
+  url: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/',
+});
+
 // ── 스타일 정의 ──────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   page: {
     padding: 60,
+    paddingBottom: 20, // 연속적인 느낌을 위해 하단 패딩 축소
     backgroundColor: '#F9F7F2',
     fontFamily: 'Noto Serif KR',
     color: '#2C2C2C',
@@ -30,10 +37,9 @@ const styles = StyleSheet.create({
   },
   // 헤더 영역
   header: {
-    marginBottom: 40,
-    borderBottomWidth: 2,
-    borderBottomColor: '#C5A059',
     paddingBottom: 20,
+    marginBottom: 40,
+    textAlign: 'center',
   },
   title: {
     fontSize: 24,
@@ -61,11 +67,8 @@ const styles = StyleSheet.create({
   },
   gridItem: {
     flex: 1,
-    padding: 15,
-    borderWidth: 1,
-    borderColor: '#C5A059',
-    backgroundColor: '#FFF',
-    borderRadius: 4,
+    padding: '10 0',
+    backgroundColor: 'transparent',
   },
   label: {
     fontSize: 9,
@@ -139,28 +142,38 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 1.8,
     textAlign: 'justify',
+    // 이모지 깨짐 방지를 위한 폰트 폴백 설정 (지원되는 경우)
+    fontFamily: 'Noto Serif KR',
+  },
+  // 마지막 페이지 전용 푸터 스타일 (낙관 스타일)
+  finalFooter: {
+    marginTop: 40,
+    paddingTop: 20,
+    borderTopWidth: 0.5,
+    borderTopColor: 'rgba(197, 160, 89, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sealText: {
+    fontSize: 10,
+    color: '#C5A059',
+    fontWeight: 'bold',
+    letterSpacing: 2,
+  },
+  urlText: {
+    fontSize: 8,
+    color: '#AAA',
+    marginTop: 4,
   },
   // 푸터 영역
   footer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 60,
-    right: 60,
-    textAlign: 'center',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(197, 160, 89, 0.2)',
-    paddingTop: 15,
-  },
-  footerText: {
-    fontSize: 9,
-    color: '#AAA',
-    letterSpacing: 1,
+    display: 'none',
   },
   pageNumber: {
     fontSize: 8,
     color: '#CCC',
     position: 'absolute',
-    bottom: 10,
+    bottom: 20,
     right: 30,
   }
 });
@@ -205,22 +218,18 @@ export const OrientalReport = ({
         </View>
       </View>
 
-      {/* Grid Info */}
+      {/* Grid Info (Borders & Backgrounds Removed) */}
       <View style={styles.gridContainer}>
         <View style={styles.gridItem}>
-          <Text style={styles.label}>SEEKER</Text>
+          <Text style={styles.label}>SEEKER (내담자)</Text>
           <Text style={styles.value}>{clientName || '-'} 님</Text>
         </View>
         <View style={styles.gridItem}>
-          <Text style={styles.label}>TOPIC</Text>
+          <Text style={styles.label}>TOPIC (상담 주제)</Text>
           <Text style={styles.value}>{category || '-'}</Text>
         </View>
       </View>
 
-      {/* Tarot Cards */}
-      <View style={{ marginBottom: 15 }}>
-        <Text style={{ fontSize: 13, fontWeight: 'bold' }}>◈ 사용된 타로 카드 배열</Text>
-      </View>
       <View style={styles.cardContainer}>
         {cardImages && cardImages.length > 0 ? cardImages.map((card, idx) => (
           <View key={idx} style={styles.cardBox}>
@@ -255,12 +264,18 @@ export const OrientalReport = ({
         </Text>
       </View>
 
-      {/* Footer (Fixed for each page) */}
-      <View style={styles.footer} fixed>
-        <Text style={styles.footerText}>
-          ARCANA LAB | &copy; 2024 REPORT SERVICE SYSTEM
-        </Text>
-      </View>
+      {/* Footer (Last Page Only via Logic) */}
+      <View 
+        style={styles.finalFooter}
+        render={({ pageNumber, totalPages }) => (
+          pageNumber === totalPages ? (
+            <View style={{ alignItems: 'center' }}>
+              <Text style={styles.sealText}>ARCANALAB</Text>
+              <Text style={styles.urlText}>https://arcanalab.vip-center.kr/</Text>
+            </View>
+          ) : null
+        )}
+      />
 
       {/* Page Number */}
       <Text 

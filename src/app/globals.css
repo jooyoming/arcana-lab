@@ -179,3 +179,47 @@ h1, h2, h3, h4, .font-serif {
   background: linear-gradient(90deg, transparent, var(--bori-gold), transparent);
   opacity: 0.5;
 }
+/* 💨 솟을대문 대기 화면: 향 연기 및 영험한 빛 효과 */
+@keyframes incense-smoke {
+  0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
+  20% { opacity: 0.4; }
+  50% { transform: translateY(-20px) translateX(15px) scale(1.1); opacity: 0.6; }
+  80% { opacity: 0.3; }
+  100% { transform: translateY(-50px) translateX(-10px) scale(1.3); opacity: 0; }
+}
+
+@keyframes light-shimmer {
+  0%, 100% { opacity: 0.3; transform: scale(1) rotate(0deg); }
+  50% { opacity: 0.7; transform: scale(1.1) rotate(2deg); }
+}
+
+.mystic-smoke {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(circle at 50% 100%, rgba(255,255,255,0.1) 0%, transparent 60%);
+  filter: blur(20px);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.smoke-particle {
+  position: absolute;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(15px);
+  animation: incense-smoke 6s infinite ease-out;
+  pointer-events: none;
+}
+
+.light-dapple {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse at 70% 20%, rgba(255, 245, 200, 0.2) 0%, transparent 40%),
+    radial-gradient(ellipse at 30% 10%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
+  mix-blend-mode: overlay;
+  animation: light-shimmer 8s infinite alternate ease-in-out;
+  z-index: 6;
+  pointer-events: none;
+}

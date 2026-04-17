@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Box, Text, Center } from '@mantine/core';
+import { Box, Text } from '@mantine/core';
 
 export function GateSplash() {
   const [isVisible, setIsVisible] = useState(true);
-  const [isOpened, setIsOpened] = useState(false);
 
   useEffect(() => {
     // 세션 상에서 이미 열렸는지 확인
@@ -16,197 +15,116 @@ export function GateSplash() {
       return;
     }
 
-    // 1.2초 후 자동으로 문 열기 (기존 2.8초에서 단축하여 속도감 개선)
-    const autoOpenTimer = setTimeout(() => {
-      handleOpen();
-    }, 1200);
+    // 4초 후 자동으로 이동 (3~5초 권장 사항 중 중간값)
+    const timer = setTimeout(() => {
+      handleComplete();
+    }, 4000);
 
-    return () => clearTimeout(autoOpenTimer);
+    return () => clearTimeout(timer);
   }, []);
 
-  const handleOpen = () => {
-    if (isOpened) return;
-    setIsOpened(true);
+  const handleComplete = () => {
     sessionStorage.setItem('arcana_gate_opened', 'true');
-    
-    // 애니메이션 완료 후 컴포넌트 전체 제거 (1.2초 후)
-    setTimeout(() => {
-      setIsVisible(false);
-    }, 1200);
+    setIsVisible(false);
   };
 
   if (!isVisible) return null;
 
   return (
     <Box
-      onClick={handleOpen}
+      id="splash-screen"
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
         backgroundColor: '#000',
+        backgroundImage: 'url("/images/mystic_gate.png")', // 사용자가 제공한 영험한 솟을대문 에셋
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
         overflow: 'hidden',
-        cursor: isOpened ? 'default' : 'pointer',
       }}
     >
       <AnimatePresence>
         {isVisible && (
           <>
-            {/* 문 뒤쪽 금색 광원 (Glow) */}
+            {/* 스크린 리더용 현판 텍스트 (숨김 처리) */}
+            <h1 style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', border: 0 }}>
+              아르카나 랩
+            </h1>
+
+            {/* 영험한 빛 (Dappling Light) */}
+            <div className="light-dapple" />
+
+            {/* 자욱한 연기 (Incense Smoke) */}
+            <div className="mystic-smoke" />
+            
+            {/* 연기 입자들 (랜덤 배치 효과) */}
+            {[...Array(5)].map((_, i) => (
+              <div 
+                key={i} 
+                className="smoke-particle" 
+                style={{ 
+                  left: `${10 + i * 20}%`, 
+                  bottom: '-10%', 
+                  width: `${200 + i * 100}px`, 
+                  height: `${200 + i * 100}px`,
+                  animationDelay: `${i * 1.2}s`
+                }} 
+              />
+            ))}
+
+            {/* 하단 안내 텍스트 */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ 
-                opacity: isOpened ? 1 : 0, 
-                scale: isOpened ? 1.5 : 0.8,
-              }}
-              transition={{ duration: 1.2, ease: "easeOut" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.8 }}
+              transition={{ delay: 1, duration: 2 }}
               style={{
                 position: 'absolute',
-                top: '50%',
+                bottom: '12%',
                 left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '60vw',
-                height: '60vw',
-                background: 'radial-gradient(circle, rgba(197, 160, 89, 0.4) 0%, rgba(197, 160, 89, 0) 70%)',
-                borderRadius: '50%',
-                pointerEvents: 'none',
-              }}
-            />
-
-            {/* 왼쪽 대문 */}
-            <motion.div
-              initial={{ rotateY: 0 }}
-              animate={{ rotateY: isOpened ? -105 : 0 }}
-              transition={{ duration: 1.4, ease: [0.45, 0.05, 0.55, 0.95] }}
-              style={{
-                position: 'absolute',
-                left: 0,
-                width: '50%',
-                height: '100%',
-                backgroundColor: '#2D1B0D',
-                backgroundImage: 'linear-gradient(to right, rgba(0,0,0,0.2), rgba(255,255,255,0.05)), url("https://www.transparenttextures.com/patterns/black-wood.png")',
-                borderRight: '2px solid #1A1108',
-                transformOrigin: 'left',
-                boxShadow: 'inset -20px 0 50px rgba(0,0,0,0.5)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-end',
-                paddingRight: '20px',
+                transform: 'translateX(-50%)',
+                textAlign: 'center',
+                width: '100%',
+                padding: '0 20px',
               }}
             >
-              {/* 왼쪽 문고리 장식 */}
-              <Box 
+              <Text 
+                className="font-serif" 
+                size="xs" 
                 style={{ 
-                  width: 100, height: 200, 
-                  border: '2px solid rgba(197, 160, 89, 0.4)',
-                  backgroundColor: 'rgba(0,0,0,0.2)',
-                  borderRadius: '12px 0 0 12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  marginRight: -2,
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  letterSpacing: '1px',
+                  fontWeight: 400,
+                  textShadow: '0 2px 4px rgba(0,0,0,0.5)'
                 }}
               >
-                {/* 전통 매듭/장식 느낌 */}
-                <Box style={{ 
-                  position: 'absolute', top: 20, width: 30, height: 2, backgroundColor: '#C5A059', opacity: 0.5 
-                }} />
-                <Box style={{ 
-                  width: 50, height: 50, borderRadius: '50%', 
-                  border: '5px solid #C5A059', 
-                  backgroundImage: 'radial-gradient(circle, #E5C079 0%, #C5A059 70%)',
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.8), 0 0 20px rgba(197, 160, 89, 0.3)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                   {/* 고급스러운 중앙 점 */}
-                   <Box style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#2D1B0D' }} />
-                </Box>
-                <Box style={{ 
-                  position: 'absolute', bottom: 20, width: 30, height: 2, backgroundColor: '#C5A059', opacity: 0.5 
-                }} />
-              </Box>
+                운명을 해독하는 영험한 공간
+              </Text>
+              <Text 
+                className="font-serif" 
+                size="xs" 
+                mt={4}
+                style={{ 
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  letterSpacing: '0.5px',
+                  fontSize: '10px'
+                }}
+              >
+                연구소로 들어가는 영적인 통로... 잠시 후 자동으로 이동합니다.
+              </Text>
             </motion.div>
 
-            {/* 오른쪽 대문 */}
-            <motion.div
-              initial={{ rotateY: 0 }}
-              animate={{ rotateY: isOpened ? 105 : 0 }}
-              transition={{ duration: 1.4, ease: [0.45, 0.05, 0.55, 0.95] }}
-              style={{
-                position: 'absolute',
-                right: 0,
-                width: '50%',
-                height: '100%',
-                backgroundColor: '#2D1B0D',
-                backgroundImage: 'linear-gradient(to left, rgba(0,0,0,0.2), rgba(255,255,255,0.05)), url("https://www.transparenttextures.com/patterns/black-wood.png")',
-                borderLeft: '2px solid #1A1108',
-                transformOrigin: 'right',
-                boxShadow: 'inset 20px 0 50px rgba(0,0,0,0.5)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                paddingLeft: '20px',
-              }}
-            >
-              {/* 오른쪽 문고리 장식 */}
-              <Box 
-                style={{ 
-                  width: 100, height: 200, 
-                  border: '2px solid rgba(197, 160, 89, 0.4)',
-                  backgroundColor: 'rgba(0,0,0,0.2)',
-                  borderRadius: '0 12px 12px 0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  marginLeft: -2,
-                }}
-              >
-                <Box style={{ 
-                  position: 'absolute', top: 20, width: 30, height: 2, backgroundColor: '#C5A059', opacity: 0.5 
-                }} />
-                <Box style={{ 
-                  width: 50, height: 50, borderRadius: '50%', 
-                  border: '5px solid #C5A059', 
-                  backgroundImage: 'radial-gradient(circle, #E5C079 0%, #C5A059 70%)',
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.8), 0 0 20px rgba(197, 160, 89, 0.3)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                   <Box style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#2D1B0D' }} />
-                </Box>
-                <Box style={{ 
-                  position: 'absolute', bottom: 20, width: 30, height: 2, backgroundColor: '#C5A059', opacity: 0.5 
-                }} />
-              </Box>
-            </motion.div>
-
-            {/* 안내 텍스트 */}
-            {!isOpened && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                style={{
-                  position: 'absolute',
-                  bottom: '15%',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  textAlign: 'center',
-                  color: '#C5A059',
-                  zIndex: 10,
-                }}
-              >
-                <Text size="xs" fw={700} style={{ letterSpacing: 4, opacity: 0.6, marginBottom: 8 }}>ARCANA LAB</Text>
-                <Text className="font-serif" size="xl" fw={900} style={{ letterSpacing: 2 }}>대문을 두드려 입장하세요</Text>
-                <Box mt="md" style={{ display: 'flex', justifyContent: 'center' }}>
-                    <motion.div
-                        animate={{ y: [0, -10, 0] }}
-                        transition={{ repeat: Infinity, duration: 1.5 }}
-                        style={{ width: 1, height: 40, backgroundColor: '#C5A059' }}
-                    />
-                </Box>
-              </motion.div>
-            )}
+            {/* 중앙 빛무리 (은은한 Glow) */}
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '100vw',
+              height: '100vh',
+              background: 'radial-gradient(circle, rgba(255,245,200,0.05) 0%, transparent 80%)',
+              pointerEvents: 'none',
+            }} />
           </>
         )}
       </AnimatePresence>

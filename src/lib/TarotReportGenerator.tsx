@@ -36,12 +36,7 @@ export const substituteVariables = (text: string, clientName: string, masterNick
  * 타이틀 형식을 생성합니다.
  */
 const getFormattedTitle = (type: TitleType, nickname: string) => {
-  switch (type) {
-    case 'standard': return `Tarot Consult by ${nickname}`;
-    case 'record': return `${nickname}의 운명 기록부`;
-    case 'nameOnly': return nickname;
-    default: return `Tarot Consult by ${nickname}`;
-  }
+  return `${nickname} 님을 위한 타로 리딩 리포트`;
 };
 
 /**

@@ -127,6 +127,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             leftSection={<IconLogout size={16} />}
             onClick={() => {
               close();
+              sessionStorage.removeItem('arcana_gate_opened');
               signOut();
             }}
             fullWidth
