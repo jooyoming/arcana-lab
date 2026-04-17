@@ -1,11 +1,11 @@
 :root {
-  --bori-bg: #F9F7F2; /* 한지 베이지 */
-  --bori-deep: #1A2F2F; /* 심해 청록 */
+  --bori-bg: #F8F5F0; /* 따뜻한 한지 백색 */
+  --bori-deep: #2A5A54; /* 비취 청록 */
   --bori-gold: #C5A059; /* 금색 */
-  --bori-seal: #8B0000; /* 깊은 자적색 (톤다운된 전통 적색) */
-  --bori-text: #1A1A1A; /* 명확한 먹색 */
+  --bori-seal: #8B4513; /* 주목 적색 */
+  --bori-text: #333333; /* 깊은 먹색 */
   --bori-bamboo: #3A4D39; /* 대나무 그린 */
-  --bori-ivory: #FDFCF0; /* 고풍스러운 아이보리 */
+  --bori-ivory: #F8F5F0; /* 한지 백색 통합 */
 }
 
 /* 타이포그래피 강제 적용 (메뉴, 카드 안의 강조 텍스트 등) */
@@ -22,7 +22,7 @@ body {
   background-color: var(--bori-ivory); /* 고급스러운 아이보리 (백자색) */
   color: var(--bori-text);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3e%3cfilter id='noiseFilter'%3e%3ctfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3e%3c/svg%3e");
-  font-family: var(--font-sans), sans-serif;
+  font-family: 'Noto Sans KR', sans-serif !important;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -30,49 +30,31 @@ h1, h2, h3, h4, .font-serif {
   font-family: var(--font-serif), serif !important;
 }
 
-/* 프리미엄 얇은 금색 테두리 카드 (그림자 및 모서리 장식 적용) */
+/* 프리미엄 한옥 스타일 카드 (창호 그리드 및 넓은 여백) */
 .bori-card {
   position: relative;
-  background-color: rgba(253, 252, 240, 0.85) !important; /* 약간 투명한 아이보리 */
+  background-color: rgba(248, 245, 240, 0.85) !important; /* 한지 백색 투명 */
   backdrop-filter: blur(8px);
   border: none !important; /* 딱딱한 테두리 제거 */
-  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.05) !important; /* 아주 부드럽고 넓은 그림자 */
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.05) !important; /* 부드럽고 넓은 그림자 */
   border-radius: 8px !important;
-  overflow: hidden; /* 모서리 장식이 튀어나오지 않게 */
+  overflow: hidden;
+  padding: 32px !important; /* 앞마당 느낌의 시원한 여백 */
 }
 
-/* 좌상단 코너 장식 */
+/* 창호 그리드 패턴 (얇은 테두리 역할) */
 .bori-card::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 30px;
-  height: 30px;
-  background: 
-    linear-gradient(to right, var(--bori-gold) 2px, transparent 2px) 0 0,
-    linear-gradient(to bottom, var(--bori-gold) 2px, transparent 2px) 0 0;
-  background-size: 20px 20px;
-  background-repeat: no-repeat;
-  opacity: 0.6;
+  inset: 6px; /* 테두리 안쪽으로 약간 들어간 창호 무늬 */
+  border: 1px solid rgba(197, 160, 89, 0.25);
+  background-image: 
+    linear-gradient(rgba(197, 160, 89, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(197, 160, 89, 0.05) 1px, transparent 1px);
+  background-size: 15px 15px;
   pointer-events: none;
-}
-
-/* 우하단 코너 장식 */
-.bori-card::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 30px;
-  height: 30px;
-  background: 
-    linear-gradient(to left, var(--bori-gold) 2px, transparent 2px) 100% 100%,
-    linear-gradient(to top, var(--bori-gold) 2px, transparent 2px) 100% 100%;
-  background-size: 20px 20px;
-  background-repeat: no-repeat;
-  opacity: 0.6;
-  pointer-events: none;
+  z-index: 0;
+  border-radius: 4px;
 }
 
 /* 한지 스타일 입력창 */
@@ -127,7 +109,7 @@ h1, h2, h3, h4, .font-serif {
 
 /* 전통 버튼 공통 스타일 */
 .btn-oriental {
-  border-radius: 4px !important;
+  border-radius: 6px !important; /* 기와처럼 살짝 둥글게 */
   border: 1px solid var(--bori-gold) !important;
   font-weight: 700 !important;
   letter-spacing: 0.5px;
