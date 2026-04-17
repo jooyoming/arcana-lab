@@ -258,6 +258,7 @@ export default function DashboardPage() {
                 {recentSessions.map((session, idx) => (
                   <Box key={session.id}>
                     <Group
+                      className="recent-log-row"
                       px="lg"
                       py="md"
                       justify="space-between"

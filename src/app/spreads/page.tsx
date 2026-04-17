@@ -308,7 +308,7 @@ function SpreadModal({ spread, opened, onClose }: { spread: SpreadType | null; o
             <Group gap="xs" mb={4}>
               <ScrollIcon size={20} color={POINT_GOLD} />
               <Text size="xs" c={POINT_GOLD} fw={800} style={{ letterSpacing: 1 }}>
-                아르카나 랩 | 스프레드 백과
+                아르카나 랩 | 배열법 가이드
               </Text>
             </Group>
             <Title order={3} c={MAIN_INK} mb={4} className="font-serif">
@@ -512,11 +512,11 @@ export default function SpreadsGuidePage() {
         <Box ta="center" mb={50}>
           <Stack align="center" gap="sm">
             <ScrollIcon size={40} color={POINT_GOLD} />
-            <Title order={2} className="font-serif" style={{ color: MAIN_INK, fontSize: 32, fontWeight: 900, letterSpacing: '-1px' }}>
-              아르카나 랩 | 스프레드 백과
+            <Title order={2} className="font-serif responsive-title" style={{ color: MAIN_INK, fontSize: 32, fontWeight: 900, letterSpacing: '-1px' }}>
+              아르카나 랩 | 배열법 가이드
             </Title>
             <Divider color={POINT_GOLD} size="sm" style={{ width: 120 }} />
-            <Text c={MAIN_INK} opacity={0.6} size="md" maw={520} mx="auto" lh={1.8} fw={600} mt="xs">
+            <Text c={MAIN_INK} opacity={0.6} size="md" maw={520} mx="auto" lh={1.8} fw={600} mt="xs" className="responsive-desc">
               질문의 깊이에 맞는 최적의 배열법을 엄선하였습니다.<br />
               비기를 클릭하여 각 위치에 담긴 운명의 진의를 확인하십시오.
             </Text>
@@ -564,7 +564,7 @@ export default function SpreadsGuidePage() {
             <Text c={MAIN_INK} opacity={0.3} size="lg" fw={800}>해당 카테고리에 비기가 없습니다.</Text>
           </Box>
         ) : (
-          <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl">
+          <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl" className="spread-card-container">
             {filtered.map((spread) => (
               <SpreadCard key={spread.value} spread={spread} onClick={() => handleCardClick(spread)} />
             ))}

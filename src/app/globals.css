@@ -309,3 +309,55 @@ h1, h2, h3, h4, .font-serif {
   mask-image: radial-gradient(circle, black 30%, transparent 70%);
   -webkit-mask-image: radial-gradient(circle, black 30%, transparent 70%);
 }
+
+/* 📱 모바일 UI 강제 교정 (최대 768px) */
+@media (max-width: 768px) {
+  /* 1. 대시보드 - '최근 진행한 리딩 기록' 겹침 해결 */
+  .recent-log-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+  .recent-log-row > * {
+    justify-content: flex-start !important;
+    width: 100% !important;
+  }
+
+  /* 2 & 3. 상담일지 - 버튼 텍스트 잘림 해결 */
+  .btn-oriental-teal,
+  .btn-seal-stamp,
+  .btn-oriental-jujube,
+  .btn-oriental {
+    white-space: normal !important;
+    word-break: keep-all !important;
+    height: auto !important;
+    min-height: 40px !important;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* 4 & 5. 스프레드 백과 - 제목 및 설명글 어색한 줄바꿈 해결 */
+  .responsive-title,
+  .responsive-desc {
+    word-break: keep-all !important;
+    overflow-wrap: break-word !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  /* 6. 스프레드 백과 - 카드 이미지 정렬 오류 해결 */
+  .spread-card-container {
+    justify-items: center !important;
+    align-items: center !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  /* 7. 상담 Tip - 내용 완전 잘림 현상 해결 */
+  .tip-content-container {
+    aspect-ratio: auto !important;
+    min-height: 480px !important;
+    height: auto !important;
+  }
+}

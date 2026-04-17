@@ -184,6 +184,7 @@ export function CardNewsSlider({ slides, date }: { slides: TipSlide[]; date: str
     <Box style={{ width: '100%', maxWidth: 440, margin: '0 auto' }}>
       {/* 뷰포트 - 병풍 케이스 */}
       <Box
+        className="tip-content-container"
         style={{
           width: '100%',
           aspectRatio: '4/5',
