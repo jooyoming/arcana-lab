@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   },
   // 마지막 페이지 전용 푸터 스타일 (낙관 스타일)
   finalFooter: {
-    marginTop: 40,
+    marginTop: 'auto',
     paddingTop: 20,
     borderTopWidth: 0.5,
     borderTopColor: 'rgba(197, 160, 89, 0.3)',
@@ -265,17 +265,12 @@ export const OrientalReport = ({
       </View>
 
       {/* Footer (Last Page Only via Logic) */}
-      <View 
-        style={styles.finalFooter}
-        render={({ pageNumber, totalPages }) => (
-          pageNumber === totalPages ? (
-            <View style={{ alignItems: 'center' }}>
-              <Text style={styles.sealText}>ARCANALAB</Text>
-              <Text style={styles.urlText}>https://arcanalab.vip-center.kr/</Text>
-            </View>
-          ) : null
-        )}
-      />
+      <View style={styles.finalFooter}>
+        <View style={{ alignItems: 'center' }}>
+          <Text style={styles.sealText}>ARCANALAB</Text>
+          <Text style={styles.urlText}>https://arcanalab.vip-center.kr/</Text>
+        </View>
+      </View>
 
       {/* Page Number */}
       <Text 
