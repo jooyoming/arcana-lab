@@ -11,7 +11,7 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--bori-bg);
+  background-color: var(--bori-ivory); /* 고급스러운 아이보리 (백자색) */
   color: var(--bori-text);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3e%3cfilter id='noiseFilter'%3e%3ctfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3e%3c/svg%3e");
   font-family: var(--font-sans), sans-serif;
@@ -22,13 +22,49 @@ h1, h2, h3, h4, .font-serif {
   font-family: var(--font-serif), serif !important;
 }
 
-/* 얇은 금색 테두리 카드 */
+/* 프리미엄 얇은 금색 테두리 카드 (그림자 및 모서리 장식 적용) */
 .bori-card {
-  border: 1px solid var(--bori-gold) !important;
-  background-color: rgba(255, 255, 255, 0.8) !important;
+  position: relative;
+  background-color: rgba(253, 252, 240, 0.85) !important; /* 약간 투명한 아이보리 */
   backdrop-filter: blur(8px);
-  box-shadow: 0 4px 30px rgba(26, 47, 47, 0.04) !important;
-  border-radius: 4px !important;
+  border: none !important; /* 딱딱한 테두리 제거 */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(197, 160, 89, 0.1) !important; /* 부드러운 그림자 */
+  border-radius: 8px !important;
+  overflow: hidden; /* 모서리 장식이 튀어나오지 않게 */
+}
+
+/* 좌상단 코너 장식 */
+.bori-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  background: 
+    linear-gradient(to right, var(--bori-gold) 2px, transparent 2px) 0 0,
+    linear-gradient(to bottom, var(--bori-gold) 2px, transparent 2px) 0 0;
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* 우하단 코너 장식 */
+.bori-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  background: 
+    linear-gradient(to left, var(--bori-gold) 2px, transparent 2px) 100% 100%,
+    linear-gradient(to top, var(--bori-gold) 2px, transparent 2px) 100% 100%;
+  background-size: 20px 20px;
+  background-repeat: no-repeat;
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 /* 한지 스타일 입력창 */
@@ -151,18 +187,33 @@ h1, h2, h3, h4, .font-serif {
 }
 
 /* 🖱️ 네비게이션 및 메뉴 호버 시인성 수정 */
+.mantine-NavLink-root {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
 .mantine-NavLink-root:hover,
 .mantine-Tabs-tab:hover,
 .mantine-Menu-item:hover {
-  background-color: rgba(197, 160, 89, 0.08) !important;
+  background-color: transparent !important;
   color: var(--bori-deep) !important;
-  border-bottom: 1px dashed var(--bori-gold) !important;
 }
 
 .mantine-NavLink-root[data-active],
 .mantine-Tabs-tab[data-active] {
-  background-color: var(--bori-deep) !important;
-  color: var(--bori-gold) !important;
+  background-color: transparent !important;
+  color: var(--bori-seal) !important; /* 단청의 짙은 적색 */
+  font-weight: 700;
+}
+
+/* 활성화된 메뉴 항목 텍스트 왼쪽에 전통 기하학 아이콘 추가 */
+.mantine-NavLink-root[data-active] .mantine-NavLink-label::before {
+  content: "◈";
+  display: inline-block;
+  margin-right: 8px;
+  color: var(--bori-seal);
+  font-size: 0.9em;
+  vertical-align: middle;
 }
 
 /* 붓터치 구분선 */
@@ -222,4 +273,39 @@ h1, h2, h3, h4, .font-serif {
   animation: light-shimmer 8s infinite alternate ease-in-out;
   z-index: 6;
   pointer-events: none;
+}
+
+/* 💠 오색 단청 테두리 (헤더 하단 띠) */
+.dancheong-border {
+  position: relative;
+  border-bottom: 4px solid transparent;
+  border-image: repeating-linear-gradient(
+    -45deg,
+    #8B2E2E 0px, #8B2E2E 10px,
+    #1A2F2F 10px, #1A2F2F 20px,
+    #C5A059 20px, #C5A059 30px,
+    #3A4D39 30px, #3A4D39 40px
+  ) 4;
+}
+
+/* 💠 은은한 단청 패턴 워터마크 (메인 영역 우측 하단) */
+.mystic-watermark {
+  position: absolute;
+  bottom: -50px;
+  right: -50px;
+  width: 600px;
+  height: 600px;
+  background-image: repeating-conic-gradient(
+    from 0deg,
+    #8B2E2E 0deg 30deg,
+    #1A2F2F 30deg 60deg,
+    #C5A059 60deg 90deg,
+    #3A4D39 90deg 120deg
+  );
+  opacity: 0.03; /* 투명도 3% 설정 */
+  border-radius: 50%;
+  pointer-events: none; /* 클릭 방해 금지 */
+  z-index: 0;
+  mask-image: radial-gradient(circle, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(circle, black 30%, transparent 70%);
 }

@@ -34,7 +34,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       }}
       padding="md"
     >
-      <AppShell.Header style={{ borderBottom: '1px solid #C5A059', backgroundColor: '#F9F7F2' }}>
+      <AppShell.Header className="dancheong-border" style={{ backgroundColor: 'var(--bori-ivory)' }}>
         <Group h="100%" px="md" justify="space-between">
           <Group>
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" color="#1A2F2F" />
@@ -57,7 +57,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </Group>
       </AppShell.Header>
 
-      <AppShell.Navbar p="md" style={{ backgroundColor: '#F9F7F2', borderRight: '1px solid #C5A059' }}>
+      <AppShell.Navbar p="md" style={{ backgroundColor: 'var(--bori-ivory)', borderRight: 'none' }}>
         <Stack gap="xs">
           <NavLink
             component={Link}
@@ -84,7 +84,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <NavLink
             component={Link}
             href="/spreads"
-            label="스프레드 백과"
+            label="배열법 가이드"
             leftSection={<IconBook size="1rem" stroke={1.5} />}
             active={pathname === '/spreads'}
             color="bori-deep"
@@ -141,7 +141,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </Stack>
       </AppShell.Navbar>
 
-      <AppShell.Main>
+      <AppShell.Main style={{ position: 'relative', zIndex: 1 }}>
+        <div className="mystic-watermark" />
         {children}
       </AppShell.Main>
     </AppShell>
