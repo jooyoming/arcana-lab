@@ -2,10 +2,18 @@
   --bori-bg: #F9F7F2; /* 한지 베이지 */
   --bori-deep: #1A2F2F; /* 심해 청록 */
   --bori-gold: #C5A059; /* 금색 */
-  --bori-seal: #8B2E2E; /* 전통 인장 대추색 */
+  --bori-seal: #8B0000; /* 깊은 자적색 (톤다운된 전통 적색) */
   --bori-text: #1A1A1A; /* 명확한 먹색 */
   --bori-bamboo: #3A4D39; /* 대나무 그린 */
   --bori-ivory: #FDFCF0; /* 고풍스러운 아이보리 */
+}
+
+/* 타이포그래피 강제 적용 (메뉴, 카드 안의 강조 텍스트 등) */
+.mantine-NavLink-label,
+.bori-card .mantine-Text-root,
+.bori-card .mantine-Title-root,
+.bori-card .mantine-Badge-root {
+  font-family: var(--font-serif), 'Noto Serif KR', serif !important;
 }
 
 body {
@@ -28,7 +36,7 @@ h1, h2, h3, h4, .font-serif {
   background-color: rgba(253, 252, 240, 0.85) !important; /* 약간 투명한 아이보리 */
   backdrop-filter: blur(8px);
   border: none !important; /* 딱딱한 테두리 제거 */
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(197, 160, 89, 0.1) !important; /* 부드러운 그림자 */
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.05) !important; /* 아주 부드럽고 넓은 그림자 */
   border-radius: 8px !important;
   overflow: hidden; /* 모서리 장식이 튀어나오지 않게 */
 }
@@ -275,17 +283,9 @@ h1, h2, h3, h4, .font-serif {
   pointer-events: none;
 }
 
-/* 💠 오색 단청 테두리 (헤더 하단 띠) */
+/* 💠 고급 무광 금색 테두리 (헤더 하단 띠) */
 .dancheong-border {
-  position: relative;
-  border-bottom: 4px solid transparent;
-  border-image: repeating-linear-gradient(
-    -45deg,
-    #8B2E2E 0px, #8B2E2E 10px,
-    #1A2F2F 10px, #1A2F2F 20px,
-    #C5A059 20px, #C5A059 30px,
-    #3A4D39 30px, #3A4D39 40px
-  ) 4;
+  border-bottom: 3px solid var(--bori-gold) !important;
 }
 
 /* 💠 은은한 단청 패턴 워터마크 (메인 영역 우측 하단) */
@@ -297,7 +297,7 @@ h1, h2, h3, h4, .font-serif {
   height: 600px;
   background-image: repeating-conic-gradient(
     from 0deg,
-    #8B2E2E 0deg 30deg,
+    #8B0000 0deg 30deg,
     #1A2F2F 30deg 60deg,
     #C5A059 60deg 90deg,
     #3A4D39 90deg 120deg
