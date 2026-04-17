@@ -57,6 +57,27 @@ export default function LoginPage() {
     }
   };
 
+  const handleOAuthLogin = async (provider: 'google' | 'kakao') => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: 'https://arcanalab.vip-center.kr/auth/callback',
+        },
+      });
+
+      if (error) throw error;
+      
+    } catch (e: any) {
+      console.error(`OAuth Login Error (${provider}):`, e);
+      setError('로그인 설정 중입니다. 잠시 후 다시 시도해 주세요.');
+      setLoading(false);
+    }
+  };
+
   return (
     <Box style={{ 
       minHeight: '100vh', 
@@ -105,11 +126,12 @@ export default function LoginPage() {
             </Alert>
           )}
 
-          {/* 소셜 로그인 섹션 */}
           <Stack mb="xl">
             <Button 
               fullWidth 
               size="md" 
+              loading={loading}
+              onClick={() => handleOAuthLogin('google')}
               style={{ 
                 border: '1px solid var(--bori-gold)', 
                 color: '#F9F7F2', 
@@ -127,6 +149,8 @@ export default function LoginPage() {
             <Button 
               fullWidth 
               size="md" 
+              loading={loading}
+              onClick={() => handleOAuthLogin('kakao')}
               style={{ 
                 border: '1px solid var(--bori-gold)', 
                 color: '#3A2305', 
