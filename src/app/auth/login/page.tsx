@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   TextInput,
   PasswordInput,
@@ -21,10 +21,12 @@ import { IconAlertCircle, IconCircleLetterA } from '@tabler/icons-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
+import Image from 'next/image';
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -38,6 +40,17 @@ export default function LoginPage() {
       password: (val) => (val.length <= 0 ? '비밀번호를 입력해주세요' : null),
     },
   });
+
+  useEffect(() => {
+    // 애니메이션 대기 1.2초 + 열리는 시간 2.5초 = 3.7초
+    // 3.5초 즈음부터 희미해지며 완전히 사라지게 (자연스러운 전환)
+    const fadeTimer = setTimeout(() => setIsFadingOut(true), 3500);
+    const removeTimer = setTimeout(() => setShowSplash(false), 4500);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }, []);
 
   const handleSubmit = async (values: typeof form.values) => {
     setError(null);
@@ -79,6 +92,41 @@ export default function LoginPage() {
   };
 
   return (
+    <>
+      {showSplash && (
+        <Box 
+          id="splash-screen" 
+          style={{ opacity: isFadingOut ? 0 : 1 }}
+        >
+          {/* 분할된 왼쪽 솟을대문 */}
+          <Box id="gate-l">
+            <Image 
+              src="/gate_left.webp" 
+              alt="Left Gate" 
+              fill 
+              priority 
+              sizes="50vw" 
+              style={{ objectFit: 'cover', objectPosition: 'right center' }} 
+            />
+          </Box>
+          {/* 분할된 오른쪽 솟을대문 */}
+          <Box id="gate-r">
+            <Image 
+              src="/gate_right.webp" 
+              alt="Right Gate" 
+              fill 
+              priority 
+              sizes="50vw" 
+              style={{ objectFit: 'cover', objectPosition: 'left center' }} 
+            />
+          </Box>
+          
+          {/* 💨 대문이 열릴 때 더욱 신비로운 분위기를 더하는 향 연기 & 빛 */}
+          <Box className="mystic-smoke" style={{ zIndex: 10001, opacity: 0.9 }} />
+          <Box className="light-dapple" style={{ zIndex: 10001, opacity: 1 }} />
+        </Box>
+      )}
+
     <Box style={{ 
       minHeight: '100vh', 
       display: 'flex', 
@@ -210,5 +258,6 @@ export default function LoginPage() {
       </Paper>
     </Container>
     </Box>
+    </>
   );
 }

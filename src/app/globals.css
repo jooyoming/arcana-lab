@@ -336,10 +336,60 @@ h1, h2, h3, h4, .font-serif {
     overflow: hidden !important;
   }
 
-  /* 7. 상담 Tip - 내용 완전 잘림 현상 해결 */
+  /* 7. 상담 Tip - 내용 완전 잘림 현상 해결 (모바일에서 세로 길이 2배 연장) */
   .tip-content-container {
     aspect-ratio: auto !important;
-    min-height: 480px !important;
+    min-height: 960px !important;
     height: auto !important;
   }
+}
+
+/* 🚪 솟을대문 열림 애니메이션 */
+#splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  display: flex;
+  background-color: var(--bori-deep); /* 웅장함을 위한 어두운 배경 */
+  transition: opacity 1s ease-in-out;
+}
+
+#gate-l, #gate-r {
+  position: absolute;
+  top: 0;
+  width: 50vw;
+  height: 100vh;
+  z-index: 10000;
+  animation-duration: 2.5s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); /* ease-in-out 보다 묵직한 느낌 */
+  animation-fill-mode: forwards;
+  animation-delay: 1.2s; /* 접속 후 약 1.2초 대기 후 열림 */
+  box-shadow: 0 0 30px rgba(0,0,0,0.8); /* 문틈 입체감 */
+}
+
+#gate-l {
+  left: 0;
+  transform-origin: left;
+  border-right: 2px solid rgba(0,0,0,0.6);
+  animation-name: open-gate-left;
+}
+
+#gate-r {
+  right: 0;
+  transform-origin: right;
+  border-left: 2px solid rgba(0,0,0,0.6);
+  animation-name: open-gate-right;
+}
+
+@keyframes open-gate-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes open-gate-right {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(100%); }
 }
