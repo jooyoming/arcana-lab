@@ -101,7 +101,7 @@ export default function LoginPage() {
           {/* 분할된 왼쪽 솟을대문 */}
           <Box id="gate-l">
             <Image 
-              src="/gate_left.webp" 
+              src="/gate_left.jpg" 
               alt="Left Gate" 
               fill 
               priority 
@@ -112,7 +112,7 @@ export default function LoginPage() {
           {/* 분할된 오른쪽 솟을대문 */}
           <Box id="gate-r">
             <Image 
-              src="/gate_right.webp" 
+              src="/gate_right.jpg" 
               alt="Right Gate" 
               fill 
               priority 
